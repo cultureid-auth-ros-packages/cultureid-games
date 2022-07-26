@@ -318,6 +318,19 @@ class GuiGameA():
     # The current unanswered question for this group
     current_q = self.q[1][current_group]
 
+    # All the choices for this question
+    choices = self.C[current_group][current_q]
+
+    # The only correct answer
+    correct_a = self.A[current_group][current_q]
+
+    # Is this a button question or a rfid-card question?
+    do_open_rfid_reader = False
+    if isinstance(correct_a, str):
+      do_open_rfid_reader = True
+
+
+
     # Show Q
     buttonVec = []
     buttonText = []
@@ -364,17 +377,6 @@ class GuiGameA():
     buttonVec = []
     buttonText = []
 
-    # All the choices for this question
-    choices = self.C[current_group][current_q]
-
-    # The only correct answer
-    correct_a = self.A[current_group][current_q]
-
-    # Is this a button question or a rfid-card question?
-    do_open_rfid_reader = False
-    if isinstance(correct_a, str):
-      do_open_rfid_reader = True
-
 
 
     # Show A
@@ -382,7 +384,7 @@ class GuiGameA():
       rospy.logwarn(answer_txt)
       rospy.logwarn(num)
       buttonText.append(answer_txt)
-      this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white',activebackground="green", command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader, frame))
+      this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white',activebackground="green", command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
       buttonVec.append(this_butt)
 
     xNum,yNum = self.get_x_y_dims(len(buttonVec))
@@ -437,6 +439,7 @@ class GuiGameA():
 
         if val == -1:
           rospy.loginfo('-1')
+          #self.insufficient_answer()
         if val == True:
           rospy.loginfo('true')
           rospy.logwarn('SHUTTING DOWN RFID READER')
@@ -445,42 +448,104 @@ class GuiGameA():
         if val == False:
           rospy.loginfo('false')
           self.total_errors = self.total_errors+1
-          incorrect_answer(frame)
+          #self.incorrect_answer()
 
         # Flush rfid measurements file (less errors and faster gameplay)
         self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
         rospy.sleep(1.0)
 
-      self.correct_answer(frame)
+      self.correct_answer()
 
 
 
 
 ################################################################################
-  def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader, frame):
+  def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader):
 
     if do_open_rfid_reader == False:
       if answer_given == correct_a:
-        self.correct_answer(frame)
+        self.correct_answer()
       else:
-        self.incorrect_answer(frame)
+        self.incorrect_answer()
 
 
 
 ################################################################################
-  def correct_answer(self, frame):
+  def correct_answer(self):
 
     # Update answered questions num
     self.q[1][self.q[0]] = self.q[1][self.q[0]] + 1
     rospy.logwarn('this answer is correct')
 
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    # new canvas
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='red')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+
+    # increase total erros
+    self.total_errors = self.total_errors+1
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = Tkinter.Frame(self.root,bg='grey')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
     if self.q[1][self.q[0]] < len(self.Q[self.q[0]]):
-      self.game(self.q[0])
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white',command=partial(self.game, self.q[0]))
+      buttonVec.append(playButton)
+      buttonText.append('CORRECT! YOU R THE BOMB')
     else:
-      self.game_over(self.q[0])
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game_over, self.q[0]))
+      buttonVec.append(playButton)
+      buttonText.append('CORRECT! YOU R THE BOMB')
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 1.0
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+
+
+
+
+
 
 ################################################################################
-  def incorrect_answer(self, frame_in):
+  def incorrect_answer(self):
     rospy.logwarn('this answer is incorrect')
 
     # clean window
@@ -540,6 +605,8 @@ class GuiGameA():
         counter = counter+1
 
     return
+
+
 
 
 ################################################################################
