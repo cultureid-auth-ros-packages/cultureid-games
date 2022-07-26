@@ -505,7 +505,7 @@ class GuiGameA():
 
     playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.q[0]))
     buttonVec.append(playButton)
-    buttonText.append('wrong! haha loser')
+    buttonText.append('WRONG! HAHA LOSER')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -544,6 +544,77 @@ class GuiGameA():
 
 ################################################################################
   def game_over(self, group):
+
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    # new canvas
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='red')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+
+    # increase total erros
+    self.total_errors = self.total_errors+1
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = Tkinter.Frame(self.root,bg='grey')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+    counter = 0
+    next_group = -1
+    for i in range(0,len(self.q[1])):
+      if self.q[1][i] < len(self.Q[i]):
+        counter = counter + 1
+        next_group = i
+        break
+
+    if counter > 0:
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, next_group))
+      buttonVec.append(playButton)
+      buttonText.append('GAME OVER FOR GROUP ' + str(group+1))
+    else:
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
+      buttonVec.append(playButton)
+      buttonText.append('GAME OVER FOREVER')
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 1.0
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+    return
     return
 
 
