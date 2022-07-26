@@ -335,7 +335,16 @@ class GuiGameA():
     buttonVec = []
     buttonText = []
 
-    QButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
+    # If this question requires a rfid card as an answer then press the question button and bring the card to the reader;
+    # otherwise no need to press the question button
+    # The -1 is a workaround because the check_answer_given function is called
+    # for all types of questions, but one may find oneself in the situation where
+    # the question does not call for a rfid card but pressing the question button
+    # opens up the reader, hanging execution
+    if do_open_rfid_reader:
+      QButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
+    else:
+      QButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
     buttonVec.append(QButton)
     buttonText.append(self.Q[current_group][current_q])
 
@@ -426,39 +435,6 @@ class GuiGameA():
 
 
 
-    # Check the answer given if the answer is of the rfid-card type
-    if do_open_rfid_reader == True:
-      rospy.logwarn('OPENING RFID READER')
-      self.open_rfid_reader()
-
-      rospy.sleep(1.0)
-
-      is_answer_correct = False
-      while is_answer_correct == False:
-        val = self.check_rfid_answer_validity(correct_a)
-
-        if val == -1:
-          rospy.loginfo('-1')
-          #self.insufficient_answer()
-        if val == True:
-          rospy.loginfo('true')
-          rospy.logwarn('SHUTTING DOWN RFID READER')
-          self.close_rfid_reader()
-          is_answer_correct = True
-        if val == False:
-          rospy.loginfo('false')
-          self.total_errors = self.total_errors+1
-          #self.incorrect_answer()
-
-        # Flush rfid measurements file (less errors and faster gameplay)
-        self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
-        rospy.sleep(1.0)
-
-      self.correct_answer()
-
-
-
-
 ################################################################################
   def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader):
 
@@ -467,7 +443,35 @@ class GuiGameA():
         self.correct_answer()
       else:
         self.incorrect_answer()
+    else:
+      if answer_given == -1:
+        rospy.logwarn('OPENING RFID READER')
+        self.open_rfid_reader()
 
+        rospy.sleep(1.0)
+
+        is_answer_correct = False
+        while is_answer_correct == False:
+          val = self.check_rfid_answer_validity(correct_a)
+
+          if val == -1:
+            rospy.loginfo('-1')
+            #self.insufficient_answer()
+          if val == True:
+            rospy.loginfo('true')
+            rospy.logwarn('SHUTTING DOWN RFID READER')
+            self.close_rfid_reader()
+            is_answer_correct = True
+          if val == False:
+            rospy.loginfo('false')
+            self.total_errors = self.total_errors+1
+            #self.incorrect_answer() # BLOCKS and stays there forever; TODO
+
+          # Flush rfid measurements file (less errors and faster gameplay)
+          self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
+          rospy.sleep(1.0)
+
+        self.correct_answer()
 
 
 ################################################################################
@@ -568,9 +572,9 @@ class GuiGameA():
     buttonVec = []
     buttonText = []
 
+    buttonText.append('WRONG! HAHA LOSER')
     playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.q[0]))
     buttonVec.append(playButton)
-    buttonText.append('WRONG! HAHA LOSER')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -604,7 +608,6 @@ class GuiGameA():
 
         counter = counter+1
 
-    return
 
 
 
