@@ -32,10 +32,7 @@ class GuiGameA():
     # First group playing assumed to be group 0
     self.state = [0]
 
-    self.total_errors = 0
-    self.time_start = time.time()
-
-    # Wrong answers and game duration per group
+    # Wrong answers [0] and game duration [1] per group
     self.stats = [[],[]]
 
     self.dir_media = rospy.get_param('~dir_media', '')
@@ -87,6 +84,8 @@ class GuiGameA():
     self.stats[0].append([0] * len(self.Q))
     self.stats[1].append([0] * len(self.Q))
 
+    # Start the clock
+    self.global_time_start = time.time()
 
     # Let's go
     self.init()
@@ -451,7 +450,6 @@ class GuiGameA():
           self.correct_answer()
         if val == False:
           rospy.loginfo('false')
-          self.total_errors = self.total_errors+1
           self.incorrect_answer()
 
         # Shut down reader
@@ -479,9 +477,6 @@ class GuiGameA():
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='red')
     canvas.pack(fill=Tkinter.BOTH,expand=True)
-
-    # increase total erros
-    self.total_errors = self.total_errors+1
 
     # to frame panw sto opoio 8a einai ta koumpia
     frame = Tkinter.Frame(self.root,bg='grey')
@@ -551,9 +546,6 @@ class GuiGameA():
     canvas.configure(bg='red')
     canvas.pack(fill=Tkinter.BOTH,expand=True)
 
-    # increase total erros
-    self.total_errors = self.total_errors+1
-
     # to frame panw sto opoio 8a einai ta koumpia
     frame = Tkinter.Frame(self.root,bg='grey')
     frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
@@ -613,9 +605,6 @@ class GuiGameA():
     canvas.configure(bg='red')
     canvas.pack(fill=Tkinter.BOTH,expand=True)
 
-    # increase total erros
-    self.total_errors = self.total_errors+1
-
     # to frame panw sto opoio 8a einai ta koumpia
     frame = Tkinter.Frame(self.root,bg='grey')
     frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
@@ -672,9 +661,6 @@ class GuiGameA():
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='red')
     canvas.pack(fill=Tkinter.BOTH,expand=True)
-
-    # increase total erros
-    self.total_errors = self.total_errors+1
 
     # to frame panw sto opoio 8a einai ta koumpia
     frame = Tkinter.Frame(self.root,bg='grey')
