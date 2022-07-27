@@ -83,7 +83,7 @@ class GuiGameA():
     # Correct answers, incorrect answers, and game duration per group
     self.stats[0] = [0] * len(self.Q)
     self.stats[1] = [0] * len(self.Q)
-    self.stats[2] = [0] * len(self.Q)
+    self.stats[2] = [0] * len(self.Q) # Not used
 
     # Start the clock
     self.global_time_start = time.time()
@@ -688,11 +688,14 @@ class GuiGameA():
     if counter > 0:
       playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, next_group))
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER FOR GROUP ' + str(group+1) + '\n\n\nCorrect answers: ' + str(self.stats[0][group]) + '\n\nIncorrect answers: ' + str(self.stats[1][group]))
+      buttonText.append('GAME OVER FOR GROUP ' + str(group+1) + '\n\n\nCorrect answers: ' + str(self.stats[0][group]) + '\nIncorrect answers: ' + str(self.stats[1][group]))
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.display_winner, self.stats))
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER FOREVER')
+      txt = 'GAME OVER FOREVER\n\n\n'
+      for i in range(0,len(self.state[1])):
+        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\n\n\n'
+      buttonText.append(txt)
 
     xNum = 1
     yNum = len(buttonVec)
@@ -727,6 +730,95 @@ class GuiGameA():
         counter = counter+1
 
 
+
+################################################################################
+  def display_winner(self, stats):
+
+    correct = stats[0]
+    incorrect = stats[1]
+
+    count = []
+    for i in range(0,len(correct)):
+      count.append(correct[i]-incorrect[i])
+
+    max_v = max(count)
+    gs = [i for i,j in enumerate(count) if j == max_v]
+
+
+
+
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    # new canvas
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='red')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = Tkinter.Frame(self.root,bg='grey')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+
+    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=self.quit_game)
+    buttonVec.append(playButton)
+
+    txt = 'Congratulations to group'
+    if (len(gs) == 1):
+      txt = txt + ' ' + str(gs[0]+1)
+    else:
+      txt = txt + 's '
+      for i in range(0,len(gs)-1):
+        txt = txt + str(gs[i]+1) + ', '
+
+      txt = txt + str(gs[len(gs)-1]+1)
+
+
+    buttonText.append(txt)
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 1.0
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+
+################################################################################
+  def quit_game(self):
+    self.root.destroy()
+    rospy.signal_shutdown('game over')
+    os._exit(os.EX_OK)
 
 ################################################################################
   def get_x_y_dims(self,desiredNum):
