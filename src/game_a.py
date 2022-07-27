@@ -26,11 +26,11 @@ class GuiGameA():
     self.root = Tkinter.Tk()
     self.root.attributes('-fullscreen',True)
 
-    # self.q[0] (scalar) indicates the current group playing;
-    # self.q[1] is a list indicating the question index that has not been
+    # self.state[0] (scalar) indicates the current group playing;
+    # self.state[1] is a list indicating the question index that has not been
     # answered yet (this question is the current question)
     # First group playing assumed to be group 0
-    self.q = [0]
+    self.state = [0]
 
     self.total_errors = 0
     self.time_start = time.time()
@@ -79,7 +79,7 @@ class GuiGameA():
       return
 
     # No answers given yet, for all groups
-    self.q.append([0] * len(self.Q))
+    self.state.append([0] * len(self.Q))
 
 
     # Let's go
@@ -242,11 +242,11 @@ class GuiGameA():
       this_group_name = 'GROUP %d' %(i+1)
       buttonText.append(this_group_name)
 
-    # Swapped order so that buttons are placed horizontally
-    yNum,xNum = self.get_x_y_dims(len(buttonVec))
+    xNum = len(buttonVec)
+    yNum = 1
 
-    xEff = 0.1
-    yEff = 0.05
+    xEff = 0.25
+    yEff = 0.075
 
     GP = 0.05
 
@@ -299,24 +299,24 @@ class GuiGameA():
 
 ################################################################################
   def game(self,group):
-    self.q[0] = group
-    rospy.logwarn('Current group: %d' % self.q[0])
-    frame = self.group_buttons(self.q[0])
+    self.state[0] = group
+    rospy.logwarn('Current group: %d' % self.state[0])
+    frame = self.group_buttons(self.state[0])
 
-    if self.q[1][self.q[0]] < len(self.Q[self.q[0]]):
+    if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
       self.continue_game(frame)
     else:
-      self.game_over(self.q[0])
+      self.game_over(self.state[0])
 
 
 
 ################################################################################
   def continue_game(self, frame):
 
-    current_group = self.q[0]
+    current_group = self.state[0]
 
     # The current unanswered question for this group
-    current_q = self.q[1][current_group]
+    current_q = self.state[1][current_group]
 
     # All the choices for this question
     choices = self.C[current_group][current_q]
@@ -478,7 +478,7 @@ class GuiGameA():
   def correct_answer(self):
 
     # Update answered questions num
-    self.q[1][self.q[0]] = self.q[1][self.q[0]] + 1
+    self.state[1][self.state[0]] = self.state[1][self.state[0]] + 1
     rospy.logwarn('this answer is correct')
 
     # clean window
@@ -501,12 +501,12 @@ class GuiGameA():
     buttonVec = []
     buttonText = []
 
-    if self.q[1][self.q[0]] < len(self.Q[self.q[0]]):
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white',command=partial(self.game, self.q[0]))
+    if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white',command=partial(self.game, self.state[0]))
       buttonVec.append(playButton)
       buttonText.append('CORRECT! YOU R THE BOMB')
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game_over, self.q[0]))
+      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game_over, self.state[0]))
       buttonVec.append(playButton)
       buttonText.append('CORRECT! YOU R THE BOMB')
 
@@ -573,7 +573,7 @@ class GuiGameA():
     buttonText = []
 
     buttonText.append('WRONG! HAHA LOSER')
-    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.q[0]))
+    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.state[0]))
     buttonVec.append(playButton)
 
     xNum = 1
@@ -637,8 +637,8 @@ class GuiGameA():
 
     counter = 0
     next_group = -1
-    for i in range(0,len(self.q[1])):
-      if self.q[1][i] < len(self.Q[i]):
+    for i in range(0,len(self.state[1])):
+      if self.state[1][i] < len(self.Q[i]):
         counter = counter + 1
         next_group = i
         break
