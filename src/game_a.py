@@ -34,12 +34,16 @@ class GuiGameA():
 
     self.total_errors = 0
     self.time_start = time.time()
+
+    # Wrong answers and game duration per group
+    self.stats = [[],[]]
+
     self.dir_media = rospy.get_param('~dir_media', '')
     self.dir_scripts = rospy.get_param('~dir_scripts', '')
     self.rfid_java_exec_dir = rospy.get_param('~rfid_java_exec_dir', '')
     self.rfid_file = rospy.get_param('~rfid_file', '')
 
-    # Read plain questions, choices, answers
+    # Read [Q]uestions, [C]hoices, correct [A]nswers
     self.Q = rospy.get_param('~Q', '')
     self.C = rospy.get_param('~C', '')
     self.A = rospy.get_param('~A', '')
@@ -64,8 +68,6 @@ class GuiGameA():
     else:
       self.reset_file(self.rfid_java_exec_dir+ '/' + self.rfid_file)
 
-    # [Q]uestions, [C]hoices, and [A]nswers for game_a
-
     if self.Q == '':
       print('[cultureid_games_N] Q not set; aborting')
       return
@@ -80,6 +82,10 @@ class GuiGameA():
 
     # No answers given yet, for all groups
     self.state.append([0] * len(self.Q))
+
+    # Wrong answers and game duration per group
+    self.stats[0].append([0] * len(self.Q))
+    self.stats[1].append([0] * len(self.Q))
 
 
     # Let's go
@@ -214,6 +220,7 @@ class GuiGameA():
 
 
 ################################################################################
+# group buttons are displayed in each screen for switching between groups
   def group_buttons(self, highlight_group):
 
     # clean window
@@ -278,24 +285,6 @@ class GuiGameA():
 
     return frame
 
-################################################################################
-  def get_x_y_dims(self,desiredNum):
-
-    side1 = int(desiredNum/int(desiredNum**0.5))
-    side2 = int(desiredNum/side1)
-
-    sideSmall = np.min([side1,side2])
-    sideLarge = np.max([side1,side2])
-
-    if sideSmall*sideLarge < desiredNum:
-      sideSmall = sideSmall+1
-
-    side1 = np.min([sideSmall,sideLarge])
-    side2 = np.max([sideSmall,sideLarge])
-
-    return side1,side2
-
-
 
 ################################################################################
   def game(self,group):
@@ -335,12 +324,13 @@ class GuiGameA():
     buttonVec = []
     buttonText = []
 
-    # If this question requires a rfid card as an answer then press the question button and bring the card to the reader;
+    # If this question requires a rfid card as an answer then press the question
+    # button and bring the card to the reader;
     # otherwise no need to press the question button
     # The -1 is a workaround because the check_answer_given function is called
-    # for all types of questions, but one may find oneself in the situation where
-    # the question does not call for a rfid card but pressing the question button
-    # opens up the reader, hanging execution
+    # for all types of questions, but one may find oneself in the situation
+    # where the question does not call for a rfid card but pressing the question
+    # button opens up the reader, hanging execution
     if do_open_rfid_reader:
       QButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
     else:
@@ -451,27 +441,27 @@ class GuiGameA():
         rospy.sleep(1.0)
 
         is_answer_correct = False
-        while is_answer_correct == False:
-          val = self.check_rfid_answer_validity(correct_a)
+        val = self.check_rfid_answer_validity(correct_a)
 
-          if val == -1:
-            rospy.loginfo('-1')
-            #self.insufficient_answer()
-          if val == True:
-            rospy.loginfo('true')
-            rospy.logwarn('SHUTTING DOWN RFID READER')
-            self.close_rfid_reader()
-            is_answer_correct = True
-          if val == False:
-            rospy.loginfo('false')
-            self.total_errors = self.total_errors+1
-            #self.incorrect_answer() # BLOCKS and stays there forever; TODO
+        if val == -1:
+          rospy.loginfo('-1')
+          self.insufficient_answer()
+        if val == True:
+          rospy.loginfo('true')
+          self.correct_answer()
+        if val == False:
+          rospy.loginfo('false')
+          self.total_errors = self.total_errors+1
+          self.incorrect_answer()
 
-          # Flush rfid measurements file (less errors and faster gameplay)
-          self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
-          rospy.sleep(1.0)
+        # Shut down reader
+        rospy.logwarn('SHUTTING DOWN RFID READER')
+        self.close_rfid_reader()
 
-        self.correct_answer()
+        # Flush rfid measurements file (less errors and faster gameplay)
+        self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
+
+
 
 
 ################################################################################
@@ -610,6 +600,65 @@ class GuiGameA():
 
 
 
+################################################################################
+  def insufficient_answer(self):
+    rospy.logwarn('this answer is insufficient')
+
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    # new canvas
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='red')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+
+    # increase total erros
+    self.total_errors = self.total_errors+1
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = Tkinter.Frame(self.root,bg='grey')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+    buttonText.append('BRING THE CARD CLOSER')
+    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.state[0]))
+    buttonVec.append(playButton)
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 1.0
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].update()
+
+        counter = counter+1
 
 
 ################################################################################
@@ -684,8 +733,26 @@ class GuiGameA():
 
         counter = counter+1
 
-    return
-    return
+
+
+################################################################################
+  def get_x_y_dims(self,desiredNum):
+
+    side1 = int(desiredNum/int(desiredNum**0.5))
+    side2 = int(desiredNum/side1)
+
+    sideSmall = np.min([side1,side2])
+    sideLarge = np.max([side1,side2])
+
+    if sideSmall*sideLarge < desiredNum:
+      sideSmall = sideSmall+1
+
+    side1 = np.min([sideSmall,sideLarge])
+    side2 = np.max([sideSmall,sideLarge])
+
+    return side1,side2
+
+
 
 
   ############################################################################
