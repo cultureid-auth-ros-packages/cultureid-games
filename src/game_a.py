@@ -814,6 +814,9 @@ class GuiGameA():
         counter = counter+1
 
 
+    call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
+
+
 ################################################################################
   def quit_game(self):
     self.root.destroy()
