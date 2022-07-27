@@ -32,8 +32,8 @@ class GuiGameA():
     # First group playing assumed to be group 0
     self.state = [0]
 
-    # Wrong answers [0] and game duration [1] per group
-    self.stats = [[],[]]
+    # Correct answers [0], incorrect answers [1] and game duration [2] per group
+    self.stats = [[],[],[]]
 
     self.dir_media = rospy.get_param('~dir_media', '')
     self.dir_scripts = rospy.get_param('~dir_scripts', '')
@@ -80,9 +80,10 @@ class GuiGameA():
     # No answers given yet, for all groups
     self.state.append([0] * len(self.Q))
 
-    # Wrong answers and game duration per group
-    self.stats[0].append([0] * len(self.Q))
-    self.stats[1].append([0] * len(self.Q))
+    # Correct answers, incorrect answers, and game duration per group
+    self.stats[0] = [0] * len(self.Q)
+    self.stats[1] = [0] * len(self.Q)
+    self.stats[2] = [0] * len(self.Q)
 
     # Start the clock
     self.global_time_start = time.time()
@@ -239,7 +240,7 @@ class GuiGameA():
     buttonText = []
 
     for i in range(0,len(self.Q)):
-      if highlight_group == i:
+      if i == highlight_group:
         this_butt = Tkinter.Button(frame,text='???',fg='black',bg='green', command=partial(self.game,i))
       else:
         this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game,i))
@@ -469,6 +470,9 @@ class GuiGameA():
     self.state[1][self.state[0]] = self.state[1][self.state[0]] + 1
     rospy.logwarn('this answer is correct')
 
+    # Increment correct answers counter for this group
+    self.stats[0][self.state[0]] = self.stats[0][self.state[0]] + 1
+
     # clean window
     for frames in self.root.winfo_children():
       frames.destroy()
@@ -536,6 +540,9 @@ class GuiGameA():
 ################################################################################
   def incorrect_answer(self):
     rospy.logwarn('this answer is incorrect')
+
+    # Increment incorrect answers counter for this group
+    self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
 
     # clean window
     for frames in self.root.winfo_children():
@@ -681,7 +688,7 @@ class GuiGameA():
     if counter > 0:
       playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, next_group))
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER FOR GROUP ' + str(group+1))
+      buttonText.append('GAME OVER FOR GROUP ' + str(group+1) + '\n\n\nCorrect answers: ' + str(self.stats[0][group]) + '\n\nIncorrect answers: ' + str(self.stats[1][group]))
     else:
       playButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
       buttonVec.append(playButton)
