@@ -78,30 +78,12 @@ class GuiGameA():
       rospy.logerr('[cultureid_games_N] A not set; aborting')
       return
 
-    if self.state == '':
-      rospy.logerr('[cultureid_games_N] state not set; aborting')
-      return
-    else: # Check if the last game is needed to be restored
-      if sum(self.state[1]) != 0:
+    # Check if the user wants to restore the last game if abruptly hung up
+    if self.in_state != '' and self.in_stats != '':
+      self.ask_to_restore_state = False
+      if sum(self.in_state[1]) != 0:
         self.ask_to_restore_state = True
-      else:
-        self.ask_to_restore_state = False
 
-        # but reset anyway for good measure
-        self.reset_state()
-
-    if self.stats == '':
-      rospy.logerr('[cultureid_games_N] stats not set; aborting')
-      return
-
-
-    # No answers given yet, for all groups
-    self.state[1] = [0] * len(self.Q)
-
-    # Correct answers, incorrect answers, and game duration per group
-    self.stats[0] = [0] * len(self.Q)
-    self.stats[1] = [0] * len(self.Q)
-    self.stats[2] = [0] * len(self.Q) # Not used
 
     # Start the clock
     self.global_time_start = time.time()
@@ -171,7 +153,11 @@ class GuiGameA():
     buttonText = []
 
     buttonText.append('START GAME')
-    sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init)
+    if self.ask_to_restore_state == True:
+      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.ask_to_restore_game)
+    else:
+      self.reset_state()
+      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init)
     buttonVec.append(sg)
 
     xNum = 1
@@ -207,6 +193,130 @@ class GuiGameA():
 
         counter = counter+1
 
+
+
+################################################################################
+  def ask_to_restore_game(self):
+
+    # new canvas
+    canvas = self.new_canvas()
+    self.set_canvas(canvas)
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # Show Q
+    buttonVec = []
+    buttonText = []
+
+
+    # If this question requires a rfid card as an answer then press the question
+    # button and bring the card to the reader;
+    # otherwise no need to press the question button
+    # The -1 is a workaround because the check_answer_given function is called
+    # for all types of questions, but one may find oneself in the situation
+    # where the question does not call for a rfid card but pressing the question
+    # button opens up the reader, hanging execution
+    QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
+    buttonVec.append(QButton)
+    buttonText.append('A GAME WAS LEFT UNFINISHED. CONTINUE?')
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 0.3
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard+0.1
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+
+        buttonVec[counter].config(font=("Helvetica", 20))
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+
+
+
+    # ta koumpia tou para8urou apanthseis
+    buttonVec = []
+    buttonText = []
+
+
+    # Show choices
+    answer_txt = ['YES', 'NO']
+    for i in range(2):
+      buttonText.append(answer_txt[i])
+      this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.response_to_restore_game,i))
+      buttonVec.append(this_butt)
+
+    xNum,yNum = self.get_x_y_dims(len(buttonVec))
+
+
+    xEff = 1.0
+    yEff = 0.6
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+
+        if counter < len(buttonVec):
+          thisX = xG/2+xx*xWithGuard
+          thisY = yG/2+yy*yWithGuard+1-yEff
+
+          buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+          buttonVec[counter].config(text=buttonText[counter])
+          buttonVec[counter].update()
+
+          thisWidth = buttonVec[counter].winfo_width()
+          thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].update()
+
+        counter = counter+1
+
+
+################################################################################
+  def response_to_restore_game(self, c):
+    if c == 0:
+      self.restore_state()
+
+    if c == 1:
+      self.reset_state()
+      self.save_state_to_file()
+
+    self.select_group_init()
 
 
 
@@ -468,9 +578,13 @@ class GuiGameA():
 
         counter = counter+1
 
+
+
+
+
+
+
     # ta koumpia tou para8urou apanthseis
-
-
     buttonVec = []
     buttonText = []
 
@@ -882,6 +996,10 @@ class GuiGameA():
 
     call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
 
+    # Reset the state and save it (no hung-ups here)
+    self.reset_state()
+    self.save_state_to_file()
+
 
 ################################################################################
   def quit_game(self):
@@ -1029,10 +1147,14 @@ class GuiGameA():
     # self.state[1] is a list indicating the question index that has not been
     # answered yet (this question is the current question)
     # First group playing assumed to be group 0
-    self.state = [0, []]
+    self.state = [0,[]]
+    self.state[1] = [0] * len(self.Q)
 
     # Correct answers [0], incorrect answers [1] and game duration [2] per group
     self.stats = [[],[],[]]
+    self.stats[0] = [0] * len(self.Q)
+    self.stats[1] = [0] * len(self.Q)
+    self.stats[2] = [0] * len(self.Q) # Not used
 
 
 
