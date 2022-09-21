@@ -865,7 +865,9 @@ class GuiGameA():
 
       self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
 
-      if (proportion_of_measurements > 0.5) and (epc_most_measurements == correct_answer):
+      # Antodimi fix 20/09/2022 after tif 22
+      #if (proportion_of_measurements > 0.5) and (epc_most_measurements == correct_answer):
+      if epc_most_measurements == correct_answer:
         return True
       else:
         return False
