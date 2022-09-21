@@ -97,6 +97,19 @@ class GuiGameA():
 
 
 
+  ##############################################################################
+  def get_canvas(self):
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='white')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    return canvas
+
+
+  ##############################################################################
+  def get_frame(self):
+    frame = Tkinter.Frame(self.root,bg='white')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    return frame
 
 
 ################################################################################
@@ -108,20 +121,17 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
     buttonText = []
 
     buttonText.append('START GAME')
-    sg = Tkinter.Button(frame,text='???',fg='black',bg='white',command=self.select_group_init)
+    sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init)
     buttonVec.append(sg)
 
     xNum = 1
@@ -152,6 +162,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -167,19 +178,16 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     buttonVec = []
     buttonText = []
 
     for i in range(0,len(self.Q)):
-      this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white', activebackground="green", command=partial(self.game,i))
+      this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
       buttonVec.append(this_butt)
       this_group_name = 'GROUP %d' %(i+1)
       buttonText.append(this_group_name)
@@ -214,6 +222,7 @@ class GuiGameA():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 30))
           buttonVec[counter].update()
 
         counter = counter+1
@@ -228,22 +237,19 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     buttonVec = []
     buttonText = []
 
     for i in range(0,len(self.Q)):
       if i == highlight_group:
-        this_butt = Tkinter.Button(frame,text='???',fg='black',bg='green', command=partial(self.game,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
       else:
-        this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
 
       buttonVec.append(this_butt)
       this_group_name = 'GROUP %d' %(i+1)
@@ -252,10 +258,10 @@ class GuiGameA():
     xNum = len(buttonVec)
     yNum = 1
 
-    xEff = 0.25
+    xEff = 0.50
     yEff = 0.075
 
-    GP = 0.05
+    GP = 0.175
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
@@ -279,6 +285,7 @@ class GuiGameA():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 20))
           buttonVec[counter].update()
 
         counter = counter+1
@@ -332,9 +339,9 @@ class GuiGameA():
     # where the question does not call for a rfid card but pressing the question
     # button opens up the reader, hanging execution
     if do_open_rfid_reader:
-      QButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
+      QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
     else:
-      QButton = Tkinter.Button(frame,text='???',fg='black',bg='white')
+      QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
     buttonText.append(self.Q[current_group][current_q])
 
@@ -366,6 +373,8 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -383,7 +392,7 @@ class GuiGameA():
       rospy.logwarn(answer_txt)
       rospy.logwarn(num)
       buttonText.append(answer_txt)
-      this_butt = Tkinter.Button(frame,text='???',fg='black',bg='white',activebackground="green", command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
+      this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
       buttonVec.append(this_butt)
 
     xNum,yNum = self.get_x_y_dims(len(buttonVec))
@@ -416,6 +425,7 @@ class GuiGameA():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 30))
           buttonVec[counter].update()
 
         counter = counter+1
@@ -478,24 +488,21 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
     buttonText = []
 
     if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white',command=partial(self.game, self.state[0]))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]))
       buttonVec.append(playButton)
       buttonText.append('CORRECT! YOU R THE BOMB')
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game_over, self.state[0]))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]))
       buttonVec.append(playButton)
       buttonText.append('CORRECT! YOU R THE BOMB')
 
@@ -527,6 +534,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -549,20 +557,17 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
     buttonText = []
 
     buttonText.append('WRONG! HAHA LOSER')
-    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.state[0]))
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
     buttonVec.append(playButton)
 
     xNum = 1
@@ -593,6 +598,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -608,20 +614,17 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
     buttonText = []
 
     buttonText.append('BRING THE CARD CLOSER')
-    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, self.state[0]))
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
     buttonVec.append(playButton)
 
     xNum = 1
@@ -652,6 +655,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -665,13 +669,10 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -686,11 +687,11 @@ class GuiGameA():
         break
 
     if counter > 0:
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.game, next_group))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
       buttonVec.append(playButton)
       buttonText.append('GAME OVER FOR GROUP ' + str(group+1) + '\n\n\nCorrect answers: ' + str(self.stats[0][group]) + '\nIncorrect answers: ' + str(self.stats[1][group]))
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=partial(self.display_winner, self.stats))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.display_winner, self.stats))
       buttonVec.append(playButton)
       txt = 'GAME OVER FOREVER\n\n\n'
       for i in range(0,len(self.state[1])):
@@ -725,6 +726,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -752,20 +754,17 @@ class GuiGameA():
       frames.destroy()
 
     # new canvas
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='red')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = Tkinter.Frame(self.root,bg='grey')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    frame = self.get_frame()
 
     # ta koumpia tou para8urou
     buttonVec = []
     buttonText = []
 
 
-    playButton = Tkinter.Button(frame,text='???',fg='black',bg='white', command=self.quit_game)
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.quit_game)
     buttonVec.append(playButton)
 
     txt = 'Congratulations to group'
@@ -809,6 +808,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
         buttonVec[counter].update()
 
         counter = counter+1
