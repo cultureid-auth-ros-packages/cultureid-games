@@ -80,13 +80,15 @@ class GuiGameA():
 
     # Check if the user wants to restore the last game if abruptly hung up
     if self.in_state != '' and self.in_stats != '':
-      self.ask_to_restore_state = False
+      self.ask_to_restore = False
       if sum(self.in_state[1]) != 0:
-        self.ask_to_restore_state = True
+        self.ask_to_restore = True
 
 
-    # Start the clock
-    self.global_time_start = time.time()
+
+    # For measuring group times
+    self.previous_group = -1
+    self.global_clock = time.time()
 
     # Let's go
     self.init()
@@ -153,7 +155,7 @@ class GuiGameA():
     buttonText = []
 
     buttonText.append('START GAME')
-    if self.ask_to_restore_state == True:
+    if self.ask_to_restore == True:
       sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.ask_to_restore_game)
     else:
       self.reset_state()
@@ -448,7 +450,7 @@ class GuiGameA():
     xNum = 1
     yNum = 1
 
-    xEff = 0.10
+    xEff = 0.075
     yEff = 0.075
 
     GP = 0.175
@@ -486,7 +488,25 @@ class GuiGameA():
 ################################################################################
   def game(self,group):
     self.state[0] = group
-    rospy.logwarn('Current group: %d' % self.state[0])
+    rospy.logwarn('Current group:  %d' % self.state[0])
+    rospy.logwarn('Previous group: %d' % self.previous_group)
+
+
+    # Start the clock for the new group at every group change
+    if self.state[0] != self.previous_group:
+      self.clock_start[self.state[0]] = time.time()
+
+    # End the clock for the previous group
+    if self.previous_group == -1:
+      self.clock_end[self.state[0]] = time.time()
+      duration = self.clock_end[self.state[0]]-self.clock_start[self.state[0]]
+      self.stats[2][self.state[0]] = self.stats[2][self.state[0]] + duration
+    else:
+      self.clock_end[self.previous_group] = time.time()
+      duration = self.clock_end[self.previous_group]-self.clock_start[self.previous_group]
+      self.stats[2][self.previous_group] = self.stats[2][self.previous_group] + duration
+
+    self.previous_group = self.state[0]
 
     # Save state to file
     self.save_state_to_file()
@@ -497,6 +517,7 @@ class GuiGameA():
     # The first buttons to be drawn
     frame = self.group_buttons(self.state[0], frame)
     frame = self.exit_button(frame)
+
 
     if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
       self.continue_game(frame)
@@ -882,7 +903,7 @@ class GuiGameA():
       buttonVec.append(playButton)
       txt = 'GAME OVER FOREVER\n\n\n'
       for i in range(0,len(self.state[1])):
-        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\n\n\n'
+        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\nGame time: ' + str(self.stats[2][i])[0:3] +  ' seconds\n\n\n'
       buttonText.append(txt)
 
     xNum = 1
@@ -913,7 +934,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 20))
+        buttonVec[counter].config(font=("Helvetica", 12))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -925,10 +946,11 @@ class GuiGameA():
 
     correct = stats[0]
     incorrect = stats[1]
+    time = stats[2]
 
     count = []
     for i in range(0,len(correct)):
-      count.append(correct[i]-incorrect[i])
+      count.append((correct[i]-incorrect[i])/time[i])
 
     max_v = max(count)
     gs = [i for i,j in enumerate(count) if j == max_v]
@@ -1137,6 +1159,7 @@ class GuiGameA():
 
   ##############################################################################
   def restore_state(self):
+    self.reset_state()
     self.state = self.in_state
     self.stats = self.in_stats
 
@@ -1155,6 +1178,9 @@ class GuiGameA():
     self.stats[0] = [0] * len(self.Q)
     self.stats[1] = [0] * len(self.Q)
     self.stats[2] = [0] * len(self.Q) # Not used
+
+    self.clock_start = [0] * len(self.Q)
+    self.clock_end = [0] * len(self.Q)
 
 
 
