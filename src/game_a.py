@@ -26,59 +26,77 @@ class GuiGameA():
     self.root = Tkinter.Tk()
     self.root.attributes('-fullscreen',True)
 
-    # self.state[0] (scalar) indicates the current group playing;
-    # self.state[1] is a list indicating the question index that has not been
-    # answered yet (this question is the current question)
-    # First group playing assumed to be group 0
-    self.state = [0]
 
-    # Correct answers [0], incorrect answers [1] and game duration [2] per group
-    self.stats = [[],[],[]]
-
+    # Read params
     self.dir_media = rospy.get_param('~dir_media', '')
     self.dir_scripts = rospy.get_param('~dir_scripts', '')
     self.rfid_java_exec_dir = rospy.get_param('~rfid_java_exec_dir', '')
     self.rfid_file = rospy.get_param('~rfid_file', '')
+    self.statefile = rospy.get_param('~statefile', '')
 
     # Read [Q]uestions, [C]hoices, correct [A]nswers
     self.Q = rospy.get_param('~Q', '')
     self.C = rospy.get_param('~C', '')
     self.A = rospy.get_param('~A', '')
 
+    # Read saved state
+    self.in_state = rospy.get_param('~state', '')
+    self.in_stats = rospy.get_param('~stats', '')
 
 
     if self.dir_media == '':
-      print('[cultureid_games_N] dir_media not set; aborting')
+      rospy.logerr('[cultureid_games_N] dir_media not set; aborting')
       return
 
     if self.dir_scripts == '':
-      print('[cultureid_games_N] dir_scripts not set; aborting')
+      rospy.logerr('[cultureid_games_N] dir_scripts not set; aborting')
       return
 
     if self.rfid_file == '':
-      print('[cultureid_games_N] rfid_file not set; aborting')
+      rospy.logerr('[cultureid_games_N] rfid_file not set; aborting')
       return
 
     if self.rfid_java_exec_dir == '':
-      print('[cultureid_games_N] rfid_java_exec_dir not set; aborting')
+      rospy.logerr('[cultureid_games_N] rfid_java_exec_dir not set; aborting')
       return
     else:
-      self.reset_file(self.rfid_java_exec_dir+ '/' + self.rfid_file)
+      self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
+
+    if self.statefile == '':
+      rospy.logerr('[cultureid_games_N] statefile not set; aborting')
+      return
 
     if self.Q == '':
-      print('[cultureid_games_N] Q not set; aborting')
+      rospy.logerr('[cultureid_games_N] Q not set; aborting')
       return
 
     if self.C == '':
-      print('[cultureid_games_N] C not set; aborting')
+      rospy.logerr('[cultureid_games_N] C not set; aborting')
       return
 
     if self.A == '':
-      print('[cultureid_games_N] A not set; aborting')
+      rospy.logerr('[cultureid_games_N] A not set; aborting')
       return
 
+    if self.state == '':
+      rospy.logerr('[cultureid_games_N] state not set; aborting')
+      return
+    else: # Check if the last game is needed to be restored
+      if sum(self.state[1]) != 0:
+        self.ask_to_restore_state = True
+      else:
+        self.ask_to_restore_state = False
+
+        # but reset anyway for good measure
+        self.reset_state()
+
+    if self.stats == '':
+      rospy.logerr('[cultureid_games_N] stats not set; aborting')
+      return
+
+
     # No answers given yet, for all groups
-    self.state.append([0] * len(self.Q))
+    self.state[1] = [0] * len(self.Q)
 
     # Correct answers, incorrect answers, and game duration per group
     self.stats[0] = [0] * len(self.Q)
@@ -360,6 +378,9 @@ class GuiGameA():
     self.state[0] = group
     rospy.logwarn('Current group: %d' % self.state[0])
 
+    # Save state to file
+    self.save_state_to_file()
+
     frame = self.new_frame()
     self.set_frame(frame)
 
@@ -551,6 +572,9 @@ class GuiGameA():
     # Increment correct answers counter for this group
     self.stats[0][self.state[0]] = self.stats[0][self.state[0]] + 1
 
+    # Save state to file
+    self.save_state_to_file()
+
     # to frame panw sto opoio 8a einai ta koumpia
     frame = self.new_frame()
     self.set_frame(frame)
@@ -606,13 +630,15 @@ class GuiGameA():
 
 
 
-
 ################################################################################
   def incorrect_answer(self):
     rospy.logwarn('this answer is incorrect')
 
     # Increment incorrect answers counter for this group
     self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
+
+    # Save state to file
+    self.save_state_to_file()
 
     # to frame panw sto opoio 8a einai ta koumpia
     frame = self.new_frame()
@@ -714,6 +740,9 @@ class GuiGameA():
 ################################################################################
   def game_over(self, group):
 
+    # Save state to file
+    self.save_state_to_file()
+
     # to frame panw sto opoio 8a einai ta koumpia
     frame = self.new_frame()
     self.set_frame(frame)
@@ -801,7 +830,7 @@ class GuiGameA():
     buttonText = []
 
 
-    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.quit_game)
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
     buttonVec.append(playButton)
 
     txt = 'Congratulations to group'
@@ -852,7 +881,6 @@ class GuiGameA():
 
 
     call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
-    self.kill_root()
 
 
 ################################################################################
@@ -946,6 +974,67 @@ class GuiGameA():
   def reset_file(self, file_str):
     with open(file_str,'w') as f:
       f.close()
+
+  ##############################################################################
+  def write_file(self, content, file_str):
+    with open(file_str,'w') as f:
+      f.write(content)
+      f.close()
+
+  ##############################################################################
+  def compile_statestring(self):
+
+    # Compile self.state
+    state_string = 'state: [' + str(self.state[0]) + ","
+    state_string = state_string + "["
+    for i in range(len(self.Q)):
+      state_string = state_string + str(self.state[1][i])
+      if i != len(self.Q)-1:
+        state_string = state_string + ","
+    state_string = state_string + "]"
+    state_string = state_string + "]"
+
+    # Compile self.stats
+    stats_string = 'stats: ['
+
+    for i in range(len(self.stats)):
+      stats_string = stats_string + "["
+      for j in range(len(self.stats[i])):
+        stats_string = stats_string + str(self.stats[i][j])
+        if j != len(self.stats[i])-1:
+          stats_string = stats_string + ","
+
+      stats_string = stats_string + "]"
+      if i != len(self.stats)-1:
+        stats_string = stats_string + ","
+
+    stats_string = stats_string + "]"
+
+    return state_string + "\n\n" + stats_string
+
+
+  ##############################################################################
+  def save_state_to_file(self):
+    self.write_file(self.compile_statestring(), self.statefile)
+
+  ##############################################################################
+  def restore_state(self):
+    self.state = self.in_state
+    self.stats = self.in_stats
+
+  ##############################################################################
+  def reset_state(self):
+
+    # self.state[0] (scalar) indicates the current group playing;
+    # self.state[1] is a list indicating the question index that has not been
+    # answered yet (this question is the current question)
+    # First group playing assumed to be group 0
+    self.state = [0, []]
+
+    # Correct answers [0], incorrect answers [1] and game duration [2] per group
+    self.stats = [[],[],[]]
+
+
 
   ##############################################################################
   def kill_root(self):
