@@ -7,7 +7,7 @@ channel indexes eg. 1,4,3 (seperated with ",", no spaces)
 antennas eg. 1,4,3 (seperated with ",", no spaces)
 1
 txpower in dbm, must be the same size as antennas, and in the same order (10 min)
-21
+24
 rfmode eg 0, 1003 etc. only ONE value
 0
 search = single value eg. dual, dualBA, single

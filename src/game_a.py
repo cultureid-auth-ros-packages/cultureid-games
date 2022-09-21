@@ -98,33 +98,55 @@ class GuiGameA():
 
 
   ##############################################################################
-  def get_canvas(self):
+  def new_canvas(self):
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='white')
     canvas.pack(fill=Tkinter.BOTH,expand=True)
+    self.canvas_ = canvas
     return canvas
 
+  ##############################################################################
+  def set_canvas(self, canvas):
+    self.canvas_ = canvas
+
+  ##############################################################################
+  def get_canvas(self):
+    return self.canvas_
+
+  ##############################################################################
+  def new_frame(self):
+
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    frame = Tkinter.Frame(self.root,bg='white')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    self.frame_ = frame
+
+    return frame
+
+  ##############################################################################
+  def set_frame(self, frame):
+    self.frame_ = frame
 
   ##############################################################################
   def get_frame(self):
-    frame = Tkinter.Frame(self.root,bg='white')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
-    return frame
+    return self.frame_
 
 
 ################################################################################
   def init(self):
     rospy.logwarn('init')
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
 
     # new canvas
-    canvas = self.get_canvas()
+    canvas = self.new_canvas()
+    self.set_canvas(canvas)
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -173,15 +195,9 @@ class GuiGameA():
 ################################################################################
   def select_group_init(self):
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     buttonVec = []
     buttonText = []
@@ -230,17 +246,12 @@ class GuiGameA():
 
 ################################################################################
 # group buttons are displayed in each screen for switching between groups
-  def group_buttons(self, highlight_group):
+  def group_buttons(self, highlight_group, frame):
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
 
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    #frame = self.new_frame()
+    #self.set_frame(frame)
 
     buttonVec = []
     buttonText = []
@@ -276,6 +287,57 @@ class GuiGameA():
       for yy in range(yNum):
 
         if counter < len(buttonVec):
+          thisX = xG/2+xx*xWithGuard#+xEff
+          thisY = yG/2+yy*yWithGuard
+
+          buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+          buttonVec[counter].config(text=buttonText[counter])
+          buttonVec[counter].update()
+
+          thisWidth = buttonVec[counter].winfo_width()
+          thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].update()
+
+        counter = counter+1
+
+    return frame
+
+
+################################################################################
+# exit button
+  def exit_button(self,frame):
+
+    buttonVec = []
+    buttonText = []
+
+    this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='red',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
+
+    buttonVec.append(this_butt)
+    this_group_name = 'X'
+    buttonText.append(this_group_name)
+
+    xNum = 1
+    yNum = 1
+
+    xEff = 0.10
+    yEff = 0.075
+
+    GP = 0.175
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = len(buttonVec)-1
+    for xx in range(xNum):
+      for yy in range(yNum):
+
+        if counter < len(buttonVec):
           thisX = xG/2+xx*xWithGuard+1-xEff
           thisY = yG/2+yy*yWithGuard
 
@@ -297,7 +359,13 @@ class GuiGameA():
   def game(self,group):
     self.state[0] = group
     rospy.logwarn('Current group: %d' % self.state[0])
-    frame = self.group_buttons(self.state[0])
+
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # The first buttons to be drawn
+    frame = self.group_buttons(self.state[0], frame)
+    frame = self.exit_button(frame)
 
     if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
       self.continue_game(frame)
@@ -483,15 +551,9 @@ class GuiGameA():
     # Increment correct answers counter for this group
     self.stats[0][self.state[0]] = self.stats[0][self.state[0]] + 1
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -552,15 +614,9 @@ class GuiGameA():
     # Increment incorrect answers counter for this group
     self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -609,15 +665,9 @@ class GuiGameA():
   def insufficient_answer(self):
     rospy.logwarn('this answer is insufficient')
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -664,15 +714,9 @@ class GuiGameA():
 ################################################################################
   def game_over(self, group):
 
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -726,7 +770,7 @@ class GuiGameA():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 30))
+        buttonVec[counter].config(font=("Helvetica", 20))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -748,16 +792,9 @@ class GuiGameA():
 
 
 
-
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    # new canvas
-    canvas = self.get_canvas()
-
     # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.get_frame()
+    frame = self.new_frame()
+    self.set_frame(frame)
 
     # ta koumpia tou para8urou
     buttonVec = []
@@ -815,6 +852,7 @@ class GuiGameA():
 
 
     call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
+    self.kill_root()
 
 
 ################################################################################
@@ -904,11 +942,17 @@ class GuiGameA():
       f.close()
       return lines
 
-  ############################################################################
+  ##############################################################################
   def reset_file(self, file_str):
     with open(file_str,'w') as f:
       f.close()
 
+  ##############################################################################
+  def kill_root(self):
+    call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
+    self.root.destroy()
+    print('game over')
+    os._exit(os.EX_OK)
 
 
 ################################################################################
