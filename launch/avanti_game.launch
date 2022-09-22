@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="game_id"       default="a" />
+  <arg name="ppkg"          default="$(find cultureid_games_N)" />
+  <arg name="statefile"     default="$(arg ppkg)/config/state_$(arg game_id).yaml" />
+
+  <node name="cultureid_games_N_game_$(arg game_id)" pkg="cultureid_games_N" type="game.py" output="screen">
+    <param name="dir_media"           value="$(arg ppkg)/gui_resources/$(arg game_id)_media" />
+    <param name="dir_scripts"         value="$(arg ppkg)/gui_resources/$(arg game_id)_scripts" />
+    <param name="rfid_java_exec_dir"  value="$(arg ppkg)/rfid_detection_resources/game_$(arg game_id)" />
+    <param name="statefile"           value="$(arg statefile)" />
+
+    <!-- Multiple choice questions, choices, and answers -->
+    <rosparam command="load"          file="$(arg ppkg)/config/params_$(arg game_id).yaml" />
+    <rosparam command="load"          file="$(arg statefile)" />
+  </node>
+
+</launch>

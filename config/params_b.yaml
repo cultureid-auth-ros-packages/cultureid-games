@@ -1,0 +1,44 @@
+# Questions per group
+Q: [
+  ['G2 G1 Q1', 'G2 G1 Q2'],
+  ['G2 G2 Q1', 'G2 G2 Q2'],
+  ['G2 G3 Q1', 'G2 G3 Q2', 'G2 G3 Q3'],
+  ['G2 G4 Q1']
+]
+
+# Choices per question per group
+C: [
+  [
+    ['G2 G1 Q1 C1', 'G2 G1 Q1 C2', 'G2 G1 Q1 C3', 'G2 G1 Q1 C4'],
+    ['G2 G1 Q2 C1', 'G2 G1 Q2 C2', 'G2 G1 Q2 C3', 'G2 G1 Q2 C4']
+  ],
+  [
+    ['G2 G2 Q1 C1', 'G2 G2 Q1 C2', 'G2 G2 Q1 C3', 'G2 G2 Q1 C4'],
+    ['G2 G2 Q2 C1', 'G2 G2 Q2 C2', 'G2 G2 Q2 C3', 'G2 G2 Q2 C4']
+  ],
+  [
+    ['G2 G3 Q1 C1', 'G2 G3 Q1 C2', 'G2 G3 Q1 C3', 'G2 G3 Q1 C4'],
+    ['G2 G3 Q2 C1', 'G2 G3 Q2 C2', 'G2 G3 Q2 C3', 'G2 G3 Q2 C4'],
+    ['G2 G3 Q3 C1', 'G2 G3 Q3 C2', 'G2 G3 Q3 C3', 'G2 G3 Q3 C4']
+  ],
+  [
+    ['G2 G4 Q1 C1', 'G2 G4 Q1 C2']
+  ]
+]
+
+# Correct answers (zero-based indexing)
+A: [
+  [0,'E2003412DC03011924274797'],
+  ['E2003412DC03011924274797',0],
+  ['E2003412DC03011924274797',0,0],
+  [0]
+]
+
+# RFID measurements file
+rfid_file: 'results_001625143965.txt'
+
+# Starting pose for game b
+start_pose: [11.7975408942, 5.96052106997, 0,0,0, -0.999693209985, 0.0247686477145]
+
+# Goal pose at the end of game b
+goal_pose: [11.7975408942, 5.96052106997, 0,0,0, -0.999693209985, 0.0247686477145]
