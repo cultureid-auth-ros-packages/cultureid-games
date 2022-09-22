@@ -222,7 +222,7 @@ class GuiGameA():
     # button opens up the reader, hanging execution
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append('A GAME WAS LEFT UNFINISHED. CONTINUE?')
+    buttonText.append('A GAME WAS LEFT IN THE MIDDLE. CONTINUE?')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -903,7 +903,7 @@ class GuiGameA():
       buttonVec.append(playButton)
       txt = 'GAME OVER FOREVER\n\n\n'
       for i in range(0,len(self.state[1])):
-        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\nGame time: ' + str(self.stats[2][i])[0:3] +  ' seconds\n\n\n'
+        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\nGame time: ' + str(self.stats[2][i])[0:4] +  ' seconds\n\n\n'
       buttonText.append(txt)
 
     xNum = 1
