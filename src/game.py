@@ -547,7 +547,10 @@ class GuiGame():
 
     # Play question in audio form if audio file is supposed to exist
     if current_vf != '':
-      call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(current_group) + str(current_q) + '.mp3'])
+      if self.V_played[current_group][current_q] == False:
+        call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(current_group) + str(current_q) + '.mp3'])
+        self.V_played[current_group][current_q] = True
+
 
 
   ##############################################################################
@@ -1185,6 +1188,17 @@ class GuiGame():
     self.A = rospy.get_param('~A', '')
     self.I = rospy.get_param('~I', '')
     self.V = rospy.get_param('~V', '')
+
+
+    # Booleans for playing the voice-over of a question only once;
+    # otherwise it breaks balls. Init to false for all.
+    # (BTW PYTHON USES pass by reference if: self.V_played = self.V !!!)
+    self.V_played = []
+    for i in range(len(self.V)):
+      self.V_played.append([])
+      for j in range(len(self.V[i])):
+        self.V_played[i].append(False)
+
 
     # Read saved state
     self.in_state = rospy.get_param('~state', '')
