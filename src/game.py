@@ -58,7 +58,7 @@ class GuiGame():
     self.root.mainloop()
 
 
-################################################################################
+  ##############################################################################
   def ask_to_restore_game(self):
 
     # new canvas
@@ -250,7 +250,7 @@ class GuiGame():
     return
 
 
-################################################################################
+  ##############################################################################
   def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader):
 
     if do_open_rfid_reader == False:
@@ -353,6 +353,7 @@ class GuiGame():
     pose_string = pose_string + str(self.pose_.pose.pose.orientation.w) + ']'
 
     return state_string + "\n\n" + stats_string + "\n\n" + pose_string
+
 
   ##############################################################################
   def continue_game(self, frame):
@@ -483,9 +484,7 @@ class GuiGame():
         counter = counter+1
 
 
-
-
-################################################################################
+  ##############################################################################
   def correct_answer(self):
 
     # Update answered questions num
@@ -922,7 +921,6 @@ class GuiGame():
   # group buttons are displayed in each screen for switching between groups
   def group_buttons(self, highlight_group, frame):
 
-
     # to frame panw sto opoio 8a einai ta koumpia
     #frame = self.new_frame()
     #self.set_frame(frame)
@@ -978,7 +976,7 @@ class GuiGame():
     return frame
 
 
-################################################################################
+  ##############################################################################
   def incorrect_answer(self):
     rospy.logwarn('this answer is incorrect')
 
@@ -1034,8 +1032,7 @@ class GuiGame():
         counter = counter+1
 
 
-
-################################################################################
+  ##############################################################################
   def init(self):
     rospy.logwarn('init')
 
@@ -1092,8 +1089,6 @@ class GuiGame():
         buttonVec[counter].update()
 
         counter = counter+1
-
-
 
 
   ##############################################################################
@@ -1181,7 +1176,7 @@ class GuiGame():
         self.ask_to_restore = True
 
 
-################################################################################
+  ##############################################################################
   def insufficient_answer(self):
     rospy.logwarn('this answer is insufficient')
 
@@ -1284,10 +1279,7 @@ class GuiGame():
     os._exit(os.EX_OK)
 
 
-
-
-
-################################################################################
+  ##############################################################################
   def response_to_restore_game(self, c):
     if c == 0:
       self.restore_state()
@@ -1332,6 +1324,7 @@ class GuiGame():
       f.close()
       return lines
 
+
   ##############################################################################
   def reset_file(self, file_str):
     with open(file_str,'w') as f:
@@ -1343,6 +1336,7 @@ class GuiGame():
     self.reset_state()
     self.state = self.in_state
     self.stats = self.in_stats
+
 
   ##############################################################################
   def reset_state(self):
@@ -1424,6 +1418,7 @@ class GuiGame():
   ##############################################################################
   def set_amcl_init_pose(self, pose):
     self.amcl_init_pose_pub.publish(pose)
+
 
   ##############################################################################
   def set_canvas(self, canvas):
