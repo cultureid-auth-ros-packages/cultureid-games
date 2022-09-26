@@ -338,6 +338,8 @@ class GuiGame():
 
     stats_string = stats_string + "]"
 
+    # Compile self.pose TODO
+
     return state_string + "\n\n" + stats_string
 
   ##############################################################################
@@ -964,8 +966,120 @@ class GuiGame():
     return frame
 
 
+################################################################################
+  def incorrect_answer(self):
+    rospy.logwarn('this answer is incorrect')
+
+    # Increment incorrect answers counter for this group
+    self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
+
+    # Save state to file
+    self.save_state_to_file()
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+    buttonText.append('WRONG! HAHA LOSER')
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
+    buttonVec.append(playButton)
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 1.0
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
+        buttonVec[counter].update()
+
+        counter = counter+1
 
 
+
+################################################################################
+  def init(self):
+    rospy.logwarn('init')
+
+
+    # new canvas
+    canvas = self.new_canvas()
+    self.set_canvas(canvas)
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+    buttonText.append('START GAME')
+    if self.ask_to_restore == True:
+      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.ask_to_restore_game)
+    else:
+      self.reset_state()
+      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init)
+    buttonVec.append(sg)
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1
+    yEff = 1
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 30))
+        buttonVec[counter].update()
+
+        counter = counter+1
 
 
 
@@ -1033,45 +1147,9 @@ class GuiGame():
         self.ask_to_restore = True
 
 
-  ##############################################################################
-  def new_canvas(self):
-    canvas = Tkinter.Canvas(self.root)
-    canvas.configure(bg='white')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
-    self.canvas_ = canvas
-    return canvas
-
-  ##############################################################################
-  def set_canvas(self, canvas):
-    self.canvas_ = canvas
-
-  ##############################################################################
-  def new_frame(self):
-
-    # clean window
-    for frames in self.root.winfo_children():
-      frames.destroy()
-
-    frame = Tkinter.Frame(self.root,bg='white')
-    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
-    self.frame_ = frame
-
-    return frame
-
-  ##############################################################################
-  def set_frame(self, frame):
-    self.frame_ = frame
-
-
-
 ################################################################################
-  def init(self):
-    rospy.logwarn('init')
-
-
-    # new canvas
-    canvas = self.new_canvas()
-    self.set_canvas(canvas)
+  def insufficient_answer(self):
+    rospy.logwarn('this answer is insufficient')
 
     # to frame panw sto opoio 8a einai ta koumpia
     frame = self.new_frame()
@@ -1081,19 +1159,15 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-    buttonText.append('START GAME')
-    if self.ask_to_restore == True:
-      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.ask_to_restore_game)
-    else:
-      self.reset_state()
-      sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init)
-    buttonVec.append(sg)
+    buttonText.append('BRING THE CARD CLOSER')
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
+    buttonVec.append(playButton)
 
     xNum = 1
     yNum = len(buttonVec)
 
-    xEff = 1
-    yEff = 1
+    xEff = 1.0
+    yEff = 1.0
 
     GP = 0.05
 
@@ -1123,6 +1197,59 @@ class GuiGame():
         counter = counter+1
 
 
+  ##############################################################################
+  def kill_root(self):
+    call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
+    self.root.destroy()
+    print('game over')
+    os._exit(os.EX_OK)
+
+
+  ##############################################################################
+  def new_canvas(self):
+    canvas = Tkinter.Canvas(self.root)
+    canvas.configure(bg='white')
+    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    self.canvas_ = canvas
+    return canvas
+
+
+  ##############################################################################
+  def new_frame(self):
+
+    # clean window
+    for frames in self.root.winfo_children():
+      frames.destroy()
+
+    frame = Tkinter.Frame(self.root,bg='white')
+    frame.place(relwidth=0.95,relheight=0.95,relx=0.025,rely=0.025)
+    self.frame_ = frame
+
+    return frame
+
+
+  ############################################################################
+  def open_rfid_reader(self):
+    cmd = 'cd ' + self.rfid_java_exec_dir + ';' + './open_rfid_reader.sh'
+    os.system(cmd)
+
+
+  ##############################################################################
+  def pose_callback(self, msg):
+    pose = msg.pose.pose
+    q = pose.orientation
+    euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+    #self.yaw = euler[2]
+
+
+  ##############################################################################
+  def quit_game(self):
+    self.root.destroy()
+    rospy.signal_shutdown('game over')
+    os._exit(os.EX_OK)
+
+
+
 
 
 ################################################################################
@@ -1137,8 +1264,51 @@ class GuiGame():
     self.select_group_init()
 
 
+  ############################################################################
+  def read_file(self, file_str):
+    with open(file_str,'r') as f:
+      lines  = f.readlines()
+      f.close()
+      return lines
 
-################################################################################
+  ##############################################################################
+  def reset_file(self, file_str):
+    with open(file_str,'w') as f:
+      f.close()
+
+
+  ##############################################################################
+  def restore_state(self):
+    self.reset_state()
+    self.state = self.in_state
+    self.stats = self.in_stats
+
+  ##############################################################################
+  def reset_state(self):
+
+    # self.state[0] (scalar) indicates the current group playing;
+    # self.state[1] is a list indicating the question index that has not been
+    # answered yet (this question is the current question)
+    # First group playing assumed to be group 0
+    self.state = [0,[]]
+    self.state[1] = [0] * len(self.Q)
+
+    # Correct answers [0], incorrect answers [1] and game duration [2] per group
+    self.stats = [[],[],[]]
+    self.stats[0] = [0] * len(self.Q)
+    self.stats[1] = [0] * len(self.Q)
+    self.stats[2] = [0] * len(self.Q)
+
+    self.clock_start = [0] * len(self.Q)
+    self.clock_end = [0] * len(self.Q)
+
+
+  ##############################################################################
+  def save_state_to_file(self):
+    self.write_file(self.compile_statestring(), self.statefile)
+
+
+  ##############################################################################
   def select_group_init(self):
 
     # to frame panw sto opoio 8a einai ta koumpia
@@ -1190,142 +1360,15 @@ class GuiGame():
         counter = counter+1
 
 
-################################################################################
-  def incorrect_answer(self):
-    rospy.logwarn('this answer is incorrect')
-
-    # Increment incorrect answers counter for this group
-    self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
-
-    # Save state to file
-    self.save_state_to_file()
-
-    # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.new_frame()
-    self.set_frame(frame)
-
-    # ta koumpia tou para8urou
-    buttonVec = []
-    buttonText = []
-
-    buttonText.append('WRONG! HAHA LOSER')
-    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
-    buttonVec.append(playButton)
-
-    xNum = 1
-    yNum = len(buttonVec)
-
-    xEff = 1.0
-    yEff = 1.0
-
-    GP = 0.05
-
-    xWithGuard = xEff/xNum
-    xG = GP*xWithGuard
-    xB = xWithGuard-xG
-
-    yWithGuard = yEff/yNum
-    yG = GP*yWithGuard
-    yB = yWithGuard-yG
-
-    counter = 0
-    for xx in range(xNum):
-      for yy in range(yNum):
-        thisX = xG/2+xx*xWithGuard
-        thisY = yG/2+yy*yWithGuard
-
-        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
-        buttonVec[counter].config(text=buttonText[counter])
-        buttonVec[counter].update()
-
-        thisWidth = buttonVec[counter].winfo_width()
-        thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 30))
-        buttonVec[counter].update()
-
-        counter = counter+1
-
-
-
-################################################################################
-  def insufficient_answer(self):
-    rospy.logwarn('this answer is insufficient')
-
-    # to frame panw sto opoio 8a einai ta koumpia
-    frame = self.new_frame()
-    self.set_frame(frame)
-
-    # ta koumpia tou para8urou
-    buttonVec = []
-    buttonText = []
-
-    buttonText.append('BRING THE CARD CLOSER')
-    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
-    buttonVec.append(playButton)
-
-    xNum = 1
-    yNum = len(buttonVec)
-
-    xEff = 1.0
-    yEff = 1.0
-
-    GP = 0.05
-
-    xWithGuard = xEff/xNum
-    xG = GP*xWithGuard
-    xB = xWithGuard-xG
-
-    yWithGuard = yEff/yNum
-    yG = GP*yWithGuard
-    yB = yWithGuard-yG
-
-    counter = 0
-    for xx in range(xNum):
-      for yy in range(yNum):
-        thisX = xG/2+xx*xWithGuard
-        thisY = yG/2+yy*yWithGuard
-
-        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
-        buttonVec[counter].config(text=buttonText[counter])
-        buttonVec[counter].update()
-
-        thisWidth = buttonVec[counter].winfo_width()
-        thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 30))
-        buttonVec[counter].update()
-
-        counter = counter+1
-
+  ##############################################################################
+  def set_canvas(self, canvas):
+    self.canvas_ = canvas
 
 
   ##############################################################################
-  def quit_game(self):
-    self.root.destroy()
-    rospy.signal_shutdown('game over')
-    os._exit(os.EX_OK)
+  def set_frame(self, frame):
+    self.frame_ = frame
 
-
-  ############################################################################
-  def open_rfid_reader(self):
-
-    cmd = 'cd ' + self.rfid_java_exec_dir + ';' + './open_rfid_reader.sh'
-    os.system(cmd)
-
-
-
-
-
-  ############################################################################
-  def read_file(self, file_str):
-    with open(file_str,'r') as f:
-      lines  = f.readlines()
-      f.close()
-      return lines
-
-  ##############################################################################
-  def reset_file(self, file_str):
-    with open(file_str,'w') as f:
-      f.close()
 
   ##############################################################################
   def write_file(self, content, file_str):
@@ -1335,50 +1378,11 @@ class GuiGame():
 
 
 
-  ##############################################################################
-  def save_state_to_file(self):
-    self.write_file(self.compile_statestring(), self.statefile)
-
-  ##############################################################################
-  def restore_state(self):
-    self.reset_state()
-    self.state = self.in_state
-    self.stats = self.in_stats
-
-  ##############################################################################
-  def reset_state(self):
-
-    # self.state[0] (scalar) indicates the current group playing;
-    # self.state[1] is a list indicating the question index that has not been
-    # answered yet (this question is the current question)
-    # First group playing assumed to be group 0
-    self.state = [0,[]]
-    self.state[1] = [0] * len(self.Q)
-
-    # Correct answers [0], incorrect answers [1] and game duration [2] per group
-    self.stats = [[],[],[]]
-    self.stats[0] = [0] * len(self.Q)
-    self.stats[1] = [0] * len(self.Q)
-    self.stats[2] = [0] * len(self.Q)
-
-    self.clock_start = [0] * len(self.Q)
-    self.clock_end = [0] * len(self.Q)
 
 
-  ##############################################################################
-  def kill_root(self):
-    call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
-    self.root.destroy()
-    print('game over')
-    os._exit(os.EX_OK)
 
 
-  ##############################################################################
-  def pose_callback(self, msg):
-    pose = msg.pose.pose
-    q = pose.orientation
-    euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
-    #self.yaw = euler[2]
+
 
 
 
