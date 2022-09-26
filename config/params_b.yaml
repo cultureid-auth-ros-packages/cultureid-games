@@ -1,28 +1,28 @@
 # Questions per group
 Q: [
-  ['G2 G1 Q1', 'G2 G1 Q2'],
-  ['G2 G2 Q1', 'G2 G2 Q2'],
-  ['G2 G3 Q1', 'G2 G3 Q2', 'G2 G3 Q3'],
-  ['G2 G4 Q1']
+  ['GB G1 Q1', 'GB G1 Q2'],
+  ['GB G2 Q1', 'GB G2 Q2'],
+  ['GB G3 Q1', 'GB G3 Q2', 'GB G3 Q3'],
+  ['GB G4 Q1']
 ]
 
 # Choices per question per group
 C: [
   [
-    ['G2 G1 Q1 C1', 'G2 G1 Q1 C2', 'G2 G1 Q1 C3', 'G2 G1 Q1 C4'],
-    ['G2 G1 Q2 C1', 'G2 G1 Q2 C2', 'G2 G1 Q2 C3', 'G2 G1 Q2 C4']
+    ['GB G1 Q1 C1', 'GB G1 Q1 C2', 'GB G1 Q1 C3', 'GB G1 Q1 C4'],
+    ['GB G1 Q2 C1', 'GB G1 Q2 C2', 'GB G1 Q2 C3', 'GB G1 Q2 C4']
   ],
   [
-    ['G2 G2 Q1 C1', 'G2 G2 Q1 C2', 'G2 G2 Q1 C3', 'G2 G2 Q1 C4'],
-    ['G2 G2 Q2 C1', 'G2 G2 Q2 C2', 'G2 G2 Q2 C3', 'G2 G2 Q2 C4']
+    ['GB G2 Q1 C1', 'GB G2 Q1 C2', 'GB G2 Q1 C3', 'GB G2 Q1 C4'],
+    ['GB G2 Q2 C1', 'GB G2 Q2 C2', 'GB G2 Q2 C3', 'GB G2 Q2 C4']
   ],
   [
-    ['G2 G3 Q1 C1', 'G2 G3 Q1 C2', 'G2 G3 Q1 C3', 'G2 G3 Q1 C4'],
-    ['G2 G3 Q2 C1', 'G2 G3 Q2 C2', 'G2 G3 Q2 C3', 'G2 G3 Q2 C4'],
-    ['G2 G3 Q3 C1', 'G2 G3 Q3 C2', 'G2 G3 Q3 C3', 'G2 G3 Q3 C4']
+    ['GB G3 Q1 C1', 'GB G3 Q1 C2', 'GB G3 Q1 C3', 'GB G3 Q1 C4'],
+    ['GB G3 Q2 C1', 'GB G3 Q2 C2', 'GB G3 Q2 C3', 'GB G3 Q2 C4'],
+    ['GB G3 Q3 C1', 'GB G3 Q3 C2', 'GB G3 Q3 C3', 'GB G3 Q3 C4']
   ],
   [
-    ['G2 G4 Q1 C1', 'G2 G4 Q1 C2']
+    ['GB G4 Q1 C1', 'GB G4 Q1 C2']
   ]
 ]
 

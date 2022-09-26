@@ -730,6 +730,13 @@ class GuiGame():
 
 
   ##############################################################################
+  def extract_yaw(self, pose_msg):
+    q = pose_msg.pose.pose.orientation
+    euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+    return euler[2]
+
+
+  ##############################################################################
   def game(self,group):
     self.state[0] = group
     rospy.logwarn('Current group:  %d' % self.state[0])
@@ -1267,8 +1274,8 @@ class GuiGame():
   def pose_callback(self, msg):
     rospy.logwarn('Pose callback')
     self.pose_ = PoseWithCovarianceStamped(msg)
-    q = self.pose_.pose.pose.orientation
-    euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+    #q = self.pose_.pose.pose.orientation
+    #euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
     #self.yaw = euler[2]
 
 
