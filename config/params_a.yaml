@@ -1,6 +1,8 @@
+## qq signifies a line break
+
 # Questions per group
 Q: [
-  ['GA G1 Q1', 'GA G1 Q2'],
+  ['Βρείτε την προθήκη 3 με τα σύνεργα της γραφής. qq Παρατηρήστε προσεκτικά τα αντικείμενα της προθήκης. qq Ποιό από αυτά που βρίσκονται στην προθήκη βλέπετε qq να υπάρχει στην εικόνα που σας δείχνω?', 'GA G1 Q2'],
   ['GA G2 Q1', 'GA G2 Q2'],
   ['GA G3 Q1', 'GA G3 Q2', 'GA G3 Q3'],
   ['GA G4 Q1']
@@ -9,7 +11,7 @@ Q: [
 # Choices per question per group
 C: [
   [
-    ['GA G1 Q1 C1', 'GA G1 Q1 C2', 'GA G1 Q1 C3', 'GA G1 Q1 C4'],
+    ['Μολύβι', 'Γραφίδα', 'Χαρτί', 'Στυλό'],
     ['GA G1 Q2 C1', 'GA G1 Q2 C2', 'GA G1 Q2 C3', 'GA G1 Q2 C4']
   ],
   [
@@ -28,10 +30,18 @@ C: [
 
 # Correct answers (zero-based indexing)
 A: [
-  [0,'E2003412DC03011924274797'],
+  [1,'E2003412DC03011924274797'],
   ['E2003412DC03011924274797',0],
   ['E2003412DC03011924274797',0,0],
   [0]
+]
+
+# Image to display alongside the Question
+I: [
+  ['0.png', ''],
+  ['', ''],
+  ['', '', ''],
+  ['']
 ]
 
 # RFID measurements file

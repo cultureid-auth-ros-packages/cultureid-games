@@ -83,7 +83,7 @@ class GuiGame():
     # button opens up the reader, hanging execution
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append('A GAME WAS LEFT UNFINISHED. CONTINUE?')
+    buttonText.append('Υπάρχει αποθηκευμένο παιχνίδι. Συνέχεια?')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -128,7 +128,7 @@ class GuiGame():
 
 
     # Show choices
-    answer_txt = ['YES', 'NO']
+    answer_txt = ['ΒΕΒΑΙΩΣ', 'ΟΧΙ, ΕΥΧΑΡΙΣΤΩ']
     for i in range(2):
       buttonText.append(answer_txt[i])
       this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.response_to_restore_game,i))
@@ -392,7 +392,7 @@ class GuiGame():
     else:
       QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append(self.Q[current_group][current_q])
+    buttonText.append(self.Q[current_group][current_q].replace('qq ', '\n'))
 
     xNum = 1
     yNum = len(buttonVec)
@@ -423,7 +423,7 @@ class GuiGame():
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
 
-        buttonVec[counter].config(font=("Helvetica", 30))
+        buttonVec[counter].config(font=("Helvetica", 20))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -442,8 +442,8 @@ class GuiGame():
 
     # Show A
     for answer_txt,num in zip(choices,range(len(choices))):
-      rospy.logwarn(answer_txt)
-      rospy.logwarn(num)
+      #rospy.logwarn(answer_txt)
+      #rospy.logwarn(num)
       buttonText.append(answer_txt)
       this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
       buttonVec.append(this_butt)
@@ -508,11 +508,11 @@ class GuiGame():
     if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]))
       buttonVec.append(playButton)
-      buttonText.append('CORRECT! YOU R THE BOMB')
+      buttonText.append('ΕΥΓΕ!')
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]))
       buttonVec.append(playButton)
-      buttonText.append('CORRECT! YOU R THE BOMB')
+      buttonText.append('Συγχαρητήρια!')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -624,7 +624,7 @@ class GuiGame():
     playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
     buttonVec.append(playButton)
 
-    txt = 'Congratulations to group'
+    txt = 'ΣΥΓΧΑΡΗΤΗΡΙΑ ΣΤΗΝ ΟΜΑΔΑ'
     if (len(gs) == 1):
       txt = txt + ' ' + str(gs[0]+1)
     else:
@@ -801,13 +801,13 @@ class GuiGame():
     if counter > 0:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER FOR GROUP ' + str(group+1) + '\n\n\nCorrect answers: ' + str(self.stats[0][group]) + '\nIncorrect answers: ' + str(self.stats[1][group]))
+      buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]))
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.display_winner, self.stats))
       buttonVec.append(playButton)
-      txt = 'GAME OVER FOREVER\n\n\n'
+      txt = 'GAME OVER ΔΙΑ ΠΑΝΤΟΣ\n\n\n'
       for i in range(0,len(self.state[1])):
-        txt = txt + 'GROUP ' + str(i+1) + ':\nCorrect answers: ' + str(self.stats[0][i]) + '\nIncorrect answers: ' + str(self.stats[1][i]) + '\nGame time: ' + str(self.stats[2][i])[0:4] +  ' seconds\n\n\n'
+        txt = txt + 'ΟΜΑΔΑ ' + str(i+1) + ':\nΣωστές απαντήσεις: ' + str(self.stats[0][i]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][i]) + '\nΧρόνος παιχνιδιού: ' + str(self.stats[2][i])[0:4] +  ' δευτερόλεπτα\n\n\n'
       buttonText.append(txt)
 
     xNum = 1
@@ -942,7 +942,7 @@ class GuiGame():
         this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
 
       buttonVec.append(this_butt)
-      this_group_name = 'GROUP %d' %(i+1)
+      this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
       buttonText.append(this_group_name)
 
     xNum = len(buttonVec)
@@ -1001,7 +1001,7 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-    buttonText.append('WRONG! HAHA LOSER')
+    buttonText.append('Κάνατε λάθος. Πατήστε για επιστροφή')
     playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
     buttonVec.append(playButton)
 
@@ -1056,7 +1056,7 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-    buttonText.append('START GAME')
+    buttonText.append('ΕΚΚΙΝΗΣΗ')
     if self.ask_to_restore == True:
       sg = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.ask_to_restore_game)
     else:
@@ -1110,10 +1110,11 @@ class GuiGame():
     self.start_pose = rospy.get_param('~start_pose', '')
     self.goal_pose = rospy.get_param('~goal_pose', '')
 
-    # Read [Q]uestions, [C]hoices, correct [A]nswers
+    # Read [Q]uestions, [C]hoices, correct [A]nswers, [I]mages
     self.Q = rospy.get_param('~Q', '')
     self.C = rospy.get_param('~C', '')
     self.A = rospy.get_param('~A', '')
+    self.I = rospy.get_param('~I', '')
 
     # Read saved state
     self.in_state = rospy.get_param('~state', '')
@@ -1195,7 +1196,7 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-    buttonText.append('BRING THE CARD CLOSER')
+    buttonText.append('Παρακαλώ πλησιάστε την κάρτα πιο κοντά')
     playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
     buttonVec.append(playButton)
 
@@ -1274,9 +1275,6 @@ class GuiGame():
   def pose_callback(self, msg):
     rospy.logwarn('Pose callback')
     self.pose_ = PoseWithCovarianceStamped(msg)
-    #q = self.pose_.pose.pose.orientation
-    #euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
-    #self.yaw = euler[2]
 
 
   ##############################################################################
@@ -1383,7 +1381,7 @@ class GuiGame():
     for i in range(0,len(self.Q)):
       this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
       buttonVec.append(this_butt)
-      this_group_name = 'GROUP %d' %(i+1)
+      this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
       buttonText.append(this_group_name)
 
     # Swapped order so that buttons are placed horizontally
