@@ -40,6 +40,10 @@ class GuiGame():
     self.root = Tkinter.Tk()
     self.root.attributes('-fullscreen',True)
 
+    # Sets the pose estimate of amcl
+    self.amcl_init_pose_pub = \
+        rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
+
     self.init_params()
 
     # For measuring group times
@@ -79,7 +83,7 @@ class GuiGame():
     # button opens up the reader, hanging execution
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append('A GAME WAS LEFT IN THE MIDDLE. CONTINUE?')
+    buttonText.append('A GAME WAS LEFT UNFINISHED. CONTINUE?')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -338,9 +342,17 @@ class GuiGame():
 
     stats_string = stats_string + "]"
 
-    # Compile self.pose TODO
+    # Compile self.pose_
+    pose_string = 'pose: ['
+    pose_string = pose_string + str(self.pose_.pose.pose.position.x) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.position.y) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.position.z) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.orientation.x) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.orientation.y) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.orientation.z) + ', '
+    pose_string = pose_string + str(self.pose_.pose.pose.orientation.w) + ']'
 
-    return state_string + "\n\n" + stats_string
+    return state_string + "\n\n" + stats_string + "\n\n" + pose_string
 
   ##############################################################################
   def continue_game(self, frame):
@@ -877,18 +889,18 @@ class GuiGame():
 
 
   ##############################################################################
-  def goto_next_pose(self):
+  def goto_goal_pose(self):
 
     # Orientation is quaternion
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = 'map'
-    goal.target_pose.pose.position.x = self.next_pose[0]
-    goal.target_pose.pose.position.y = self.next_pose[1]
-    goal.target_pose.pose.position.z = self.next_pose[2]
-    goal.target_pose.pose.orientation.x = self.next_pose[3]
-    goal.target_pose.pose.orientation.y = self.next_pose[4]
-    goal.target_pose.pose.orientation.z = self.next_pose[5]
-    goal.target_pose.pose.orientation.w = self.next_pose[6]
+    goal.target_pose.pose.position.x = self.goal_pose[0]
+    goal.target_pose.pose.position.y = self.goal_pose[1]
+    goal.target_pose.pose.position.z = self.goal_pose[2]
+    goal.target_pose.pose.orientation.x = self.goal_pose[3]
+    goal.target_pose.pose.orientation.y = self.goal_pose[4]
+    goal.target_pose.pose.orientation.z = self.goal_pose[5]
+    goal.target_pose.pose.orientation.w = self.goal_pose[6]
 
 
     # Clear and come with me
@@ -1094,7 +1106,7 @@ class GuiGame():
     self.rfid_file = rospy.get_param('~rfid_file', '')
     self.statefile = rospy.get_param('~statefile', '')
     self.start_pose = rospy.get_param('~start_pose', '')
-    self.next_pose = rospy.get_param('~goal_pose', '')
+    self.goal_pose = rospy.get_param('~goal_pose', '')
 
     # Read [Q]uestions, [C]hoices, correct [A]nswers
     self.Q = rospy.get_param('~Q', '')
@@ -1104,6 +1116,7 @@ class GuiGame():
     # Read saved state
     self.in_state = rospy.get_param('~state', '')
     self.in_stats = rospy.get_param('~stats', '')
+    self.in_pose  = rospy.get_param('~pose', '')
 
 
     if self.dir_media == '':
@@ -1128,6 +1141,14 @@ class GuiGame():
       rospy.logerr('[cultureid_games_N] statefile not set; aborting')
       return
 
+    if self.start_pose == '':
+      rospy.logerr('[cultureid_games_N] start_pose not set; aborting')
+      return
+
+    if self.goal_pose == '':
+      rospy.logerr('[cultureid_games_N] goal_pose not set; aborting')
+      return
+
     if self.Q == '':
       rospy.logerr('[cultureid_games_N] Q not set; aborting')
       return
@@ -1139,6 +1160,19 @@ class GuiGame():
     if self.A == '':
       rospy.logerr('[cultureid_games_N] A not set; aborting')
       return
+
+    # Set pose; from normal configuration
+    self.pose_ = PoseWithCovarianceStamped()
+    self.pose_.pose.pose.position.x = self.start_pose[0]
+    self.pose_.pose.pose.position.y = self.start_pose[1]
+    self.pose_.pose.pose.position.z = self.start_pose[2]
+    self.pose_.pose.pose.orientation.x = self.start_pose[3]
+    self.pose_.pose.pose.orientation.y = self.start_pose[4]
+    self.pose_.pose.pose.orientation.z = self.start_pose[5]
+    self.pose_.pose.pose.orientation.w = self.start_pose[6]
+    self.pose_.header.stamp = rospy.Time.now()
+    self.pose_.header.frame_id = 'map'
+    self.set_amcl_init_pose(self.pose_)
 
     # Check if the user wants to restore the last game if abruptly hung up
     if self.in_state != '' and self.in_stats != '':
@@ -1236,8 +1270,9 @@ class GuiGame():
 
   ##############################################################################
   def pose_callback(self, msg):
-    pose = msg.pose.pose
-    q = pose.orientation
+    rospy.logwarn('Pose callback')
+    self.pose_ = PoseWithCovarianceStamped(msg)
+    q = self.pose_.pose.pose.orientation
     euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
     #self.yaw = euler[2]
 
@@ -1257,10 +1292,36 @@ class GuiGame():
     if c == 0:
       self.restore_state()
 
+      # Set pose; from saved file
+      self.pose_ = PoseWithCovarianceStamped()
+      self.pose_.pose.pose.position.x = self.in_pose[0]
+      self.pose_.pose.pose.position.y = self.in_pose[1]
+      self.pose_.pose.pose.position.z = self.in_pose[2]
+      self.pose_.pose.pose.orientation.x = self.in_pose[3]
+      self.pose_.pose.pose.orientation.y = self.in_pose[4]
+      self.pose_.pose.pose.orientation.z = self.in_pose[5]
+      self.pose_.pose.pose.orientation.w = self.in_pose[6]
+      self.pose_.header.stamp = rospy.Time.now()
+      self.pose_.header.frame_id = 'map'
+
     if c == 1:
       self.reset_state()
-      self.save_state_to_file()
 
+      # Set pose; from normal configuration
+      self.pose_ = PoseWithCovarianceStamped()
+      self.pose_.pose.pose.position.x = self.start_pose[0]
+      self.pose_.pose.pose.position.y = self.start_pose[1]
+      self.pose_.pose.pose.position.z = self.start_pose[2]
+      self.pose_.pose.pose.orientation.x = self.start_pose[3]
+      self.pose_.pose.pose.orientation.y = self.start_pose[4]
+      self.pose_.pose.pose.orientation.z = self.start_pose[5]
+      self.pose_.pose.pose.orientation.w = self.start_pose[6]
+      self.pose_.header.stamp = rospy.Time.now()
+      self.pose_.header.frame_id = 'map'
+
+
+    self.set_amcl_init_pose(self.pose_)
+    self.save_state_to_file()
     self.select_group_init()
 
 
@@ -1359,6 +1420,10 @@ class GuiGame():
 
         counter = counter+1
 
+
+  ##############################################################################
+  def set_amcl_init_pose(self, pose):
+    self.amcl_init_pose_pub.publish(pose)
 
   ##############################################################################
   def set_canvas(self, canvas):
