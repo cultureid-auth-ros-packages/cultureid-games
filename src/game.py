@@ -369,6 +369,24 @@ class GuiGame():
     # The only correct answer
     correct_a = self.A[current_group][current_q]
 
+    # An image to display alongside the question
+    current_i = self.I[current_group][current_q]
+
+    print current_group
+    print current_q
+    print choices
+    print correct_a
+    print current_i
+
+    # Does there have to be an image alongside the question?
+    display_image = False
+    if current_i != '':
+      display_image = True
+      img = Tkinter.PhotoImage(\
+          file=self.dir_media+'/'+ str(current_group) + str(current_q) + '.png',master=self.canvas_)
+      cuid = Tkinter.Label(frame,image=img)
+      cuid.image = img
+
     # Is this a button question or a rfid-card question?
     do_open_rfid_reader = False
     if isinstance(correct_a, str):
@@ -394,13 +412,23 @@ class GuiGame():
     buttonVec.append(QButton)
     buttonText.append(self.Q[current_group][current_q].replace('qq ', '\n'))
 
-    xNum = 1
-    yNum = len(buttonVec)
 
-    xEff = 1.0
-    yEff = 0.3
+    if display_image == True:
+      buttonVec.append(cuid)
+      buttonText.append('')
 
-    GP = 0.05
+      xEff = 1.0
+      yEff = 0.6
+      GP = 0.1
+    else:
+      xEff = 1.0
+      yEff = 0.3
+      GP = 0.1
+
+
+    xNum = len(buttonVec)
+    yNum = 1
+
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
@@ -432,8 +460,6 @@ class GuiGame():
 
 
 
-
-
     # ta koumpia tou para8urou apanthseis
     buttonVec = []
     buttonText = []
@@ -442,8 +468,6 @@ class GuiGame():
 
     # Show A
     for answer_txt,num in zip(choices,range(len(choices))):
-      #rospy.logwarn(answer_txt)
-      #rospy.logwarn(num)
       buttonText.append(answer_txt)
       this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
       buttonVec.append(this_butt)
@@ -451,10 +475,17 @@ class GuiGame():
     xNum,yNum = self.get_x_y_dims(len(buttonVec))
 
 
-    xEff = 1.0
-    yEff = 0.6
+    if display_image == True:
+      buttonVec.append(cuid)
+      buttonText.append('')
 
-    GP = 0.05
+      xEff = 1.0
+      yEff = 0.3
+      GP = 0.1
+    else:
+      xEff = 1.0
+      yEff = 0.6
+      GP = 0.1
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
