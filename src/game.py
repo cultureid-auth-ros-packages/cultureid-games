@@ -372,11 +372,14 @@ class GuiGame():
     # An image to display alongside the question
     current_i = self.I[current_group][current_q]
 
-    print current_group
-    print current_q
-    print choices
-    print correct_a
-    print current_i
+    # The voice-over of the question
+    current_vf = self.V[current_group][current_q]
+
+    #print current_group
+    #print current_q
+    #print choices
+    #print correct_a
+    #print current_i
 
     # Does there have to be an image alongside the question?
     display_image = False
@@ -410,7 +413,35 @@ class GuiGame():
     else:
       QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append(self.Q[current_group][current_q].replace('qq ', '\n'))
+
+    # Make text of question fit into `max_line_length` characters
+
+    # The text of the question
+    q_text = self.Q[current_group][current_q]
+
+    # Split by space
+    q_text_split = q_text.split(" ")
+    max_line_length = 80
+    if display_image == True:
+      max_line_length = max_line_length / 2
+
+    lines = ['']
+    line_counter = 0
+    for i in range(len(q_text_split)):
+      test_line = lines[line_counter] + " " + q_text_split[i]
+      if len(test_line) <= max_line_length:
+        lines[line_counter] = test_line
+      else:
+        line_counter = line_counter + 1
+        lines.append('\n')
+        lines[line_counter] = lines[line_counter] + " " + q_text_split[i]
+
+
+    disp_qtext = ''
+    for i in range(len(lines)):
+      disp_qtext = disp_qtext + lines[i]
+
+    buttonText.append(disp_qtext)
 
 
     if display_image == True:
@@ -451,7 +482,7 @@ class GuiGame():
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
 
-        buttonVec[counter].config(font=("Helvetica", 20))
+        buttonVec[counter].config(font=("Helvetica", 16))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -509,10 +540,14 @@ class GuiGame():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
-          buttonVec[counter].config(font=("Helvetica", 30))
+          buttonVec[counter].config(font=("Helvetica", 20))
           buttonVec[counter].update()
 
         counter = counter+1
+
+    # Play question in audio form if audio file is supposed to exist
+    if current_vf != '':
+      call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(current_group) + str(current_q) + '.mp3'])
 
 
   ##############################################################################
@@ -821,18 +856,18 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-    counter = 0
+    ccounter = 0
     next_group = -1
     for i in range(0,len(self.state[1])):
       if self.state[1][i] < len(self.Q[i]):
-        counter = counter + 1
+        ccounter = ccounter + 1
         next_group = i
         break
 
-    if counter > 0:
+    if ccounter > 0:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]))
+      buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]))
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.display_winner, self.stats))
       buttonVec.append(playButton)
@@ -869,7 +904,10 @@ class GuiGame():
 
         thisWidth = buttonVec[counter].winfo_width()
         thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 12))
+        if ccounter > 0:
+          buttonVec[counter].config(font=("Helvetica", 20))
+        else:
+          buttonVec[counter].config(font=("Helvetica", 12))
         buttonVec[counter].update()
 
         counter = counter+1
@@ -968,7 +1006,7 @@ class GuiGame():
 
     for i in range(0,len(self.Q)):
       if i == highlight_group:
-        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='green', command=partial(self.game,i))
       else:
         this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
 
@@ -979,10 +1017,10 @@ class GuiGame():
     xNum = len(buttonVec)
     yNum = 1
 
-    xEff = 0.50
-    yEff = 0.075
+    xEff = 0.70
+    yEff = 0.1
 
-    GP = 0.175
+    GP = 0.2
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
@@ -1146,6 +1184,7 @@ class GuiGame():
     self.C = rospy.get_param('~C', '')
     self.A = rospy.get_param('~A', '')
     self.I = rospy.get_param('~I', '')
+    self.V = rospy.get_param('~V', '')
 
     # Read saved state
     self.in_state = rospy.get_param('~state', '')
