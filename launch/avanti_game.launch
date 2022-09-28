@@ -6,6 +6,7 @@
 
   <node name="cultureid_games_N_game_$(arg game_id)" pkg="cultureid_games_N" type="game.py" output="screen">
     <param name="dir_media"           value="$(arg ppkg)/gui_resources/$(arg game_id)_media" />
+    <param name="cel_media"           value="$(arg ppkg)/gui_resources/$(arg game_id)_celebrations_media" />
     <param name="dir_scripts"         value="$(arg ppkg)/gui_resources/$(arg game_id)_scripts" />
     <param name="rfid_java_exec_dir"  value="$(arg ppkg)/rfid_detection_resources/game_$(arg game_id)" />
     <param name="statefile"           value="$(arg statefile)" />

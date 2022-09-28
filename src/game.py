@@ -44,6 +44,10 @@ class GuiGame():
     self.amcl_init_pose_pub = \
         rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
 
+    # Publishes raw velocity commands to the wheels of the base
+    self.raw_velocity_commands_pub = \
+        rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
+
     self.init_params()
 
     # For measuring group times
@@ -175,13 +179,12 @@ class GuiGame():
   def celebrate(self):
     rospy.logwarn('watch me im twerking')
 
-
     # This is synchronous
     #call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
 
     # This is asynchronous
-    pn = random.randint(0,5)
-    p = Popen(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(pn) + '.mp3'])
+    pn = random.randint(0,6)
+    p = Popen(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/c' + str(pn) + '.mp3'])
 
     # Celebrate randomly
     cn = random.randint(0,1)
@@ -739,13 +742,12 @@ class GuiGame():
 
         counter = counter+1
 
-
-    call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
-
     # Reset the state and save it (no hung-ups here)
     self.reset_state()
     self.save_state_to_file()
 
+    # Celebrate mf
+    self.celebrate()
 
   ##############################################################################
   # exit button
@@ -1166,6 +1168,7 @@ class GuiGame():
 
     # Read params
     self.dir_media = rospy.get_param('~dir_media', '')
+    self.cel_media = rospy.get_param('~cel_media', '')
     self.dir_scripts = rospy.get_param('~dir_scripts', '')
     self.rfid_java_exec_dir = rospy.get_param('~rfid_java_exec_dir', '')
     self.rfid_file = rospy.get_param('~rfid_file', '')
@@ -1199,6 +1202,10 @@ class GuiGame():
 
     if self.dir_media == '':
       rospy.logerr('[cultureid_games_N] dir_media not set; aborting')
+      return
+
+    if self.cel_media == '':
+      rospy.logerr('[cultureid_games_N] cel_media not set; aborting')
       return
 
     if self.dir_scripts == '':
