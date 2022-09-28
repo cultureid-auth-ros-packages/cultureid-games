@@ -813,6 +813,9 @@ class GuiGame():
     rospy.logwarn('Current group:  %d' % self.state[0])
     rospy.logwarn('Previous group: %d' % self.previous_group)
 
+    # Show the introduction video for this group (and therefore this category
+    # of questions)
+    self.show_intro_video(group)
 
     # Start the clock for the new group at every group change
     if self.state[0] != self.previous_group:
@@ -1108,7 +1111,6 @@ class GuiGame():
   def init(self):
     rospy.logwarn('init')
 
-
     # new canvas
     canvas = self.new_canvas()
     self.set_canvas(canvas)
@@ -1255,6 +1257,9 @@ class GuiGame():
       self.ask_to_restore = False
       if sum(self.in_state[1]) != 0:
         self.ask_to_restore = True
+
+    # If the introduction video has been shown do not show it again
+    self.intro_played = [False] * len(self.Q)
 
 
   ##############################################################################
@@ -1520,6 +1525,16 @@ class GuiGame():
   ##############################################################################
   def set_frame(self, frame):
     self.frame_ = frame
+
+
+  ##############################################################################
+  def show_intro_video(self, group):
+
+    if self.intro_played[group] == False:
+      call(['vlc', '--no-repeat','--fullscreen','--play-and-exit', \
+          self.dir_media + '/intro_' + str(group) + '.mp4'])
+
+      self.intro_played[group] = True
 
 
   ##############################################################################
