@@ -4,7 +4,6 @@
 import sys
 import threading
 import os
-import time
 import rospy
 import tf
 import Tkinter
@@ -813,10 +812,6 @@ class GuiGame():
     rospy.logwarn('Current group:  %d' % self.state[0])
     rospy.logwarn('Previous group: %d' % self.previous_group)
 
-    # Show the introduction video for this group (and therefore this category
-    # of questions)
-    self.show_intro_video(group)
-
     # Start the clock for the new group at every group change
     if self.state[0] != self.previous_group:
       self.clock_start[self.state[0]] = time.time()
@@ -873,7 +868,8 @@ class GuiGame():
         break
 
     if ccounter > 0:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
+      #playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.select_group_init)
       buttonVec.append(playButton)
       buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]))
     else:
@@ -1005,9 +1001,9 @@ class GuiGame():
 
     for i in range(0,len(self.Q)):
       if i == highlight_group:
-        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='green', command=partial(self.game,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='green', command=partial(self.show_intro_video_play_button,i))
       else:
-        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video_play_button,i))
 
       buttonVec.append(this_butt)
       this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
@@ -1314,6 +1310,7 @@ class GuiGame():
 
   ##############################################################################
   def kill_root(self):
+    self.save_state_to_file()
     call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
     self.root.destroy()
     print('game over')
@@ -1471,7 +1468,7 @@ class GuiGame():
     buttonText = []
 
     for i in range(0,len(self.Q)):
-      this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game,i))
+      this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video_play_button,i))
       buttonVec.append(this_butt)
       this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
       buttonText.append(this_group_name)
@@ -1530,11 +1527,66 @@ class GuiGame():
   ##############################################################################
   def show_intro_video(self, group):
 
-    if self.intro_played[group] == False:
-      call(['vlc', '--no-repeat','--fullscreen','--play-and-exit', \
-          self.dir_media + '/intro_' + str(group) + '.mp4'])
+    call(['vlc', '--no-repeat','--fullscreen','--play-and-exit', \
+        self.dir_media + '/intro_' + str(group) + '.mp4'])
 
-      self.intro_played[group] = True
+    self.game(group)
+
+
+
+  ##############################################################################
+  def show_intro_video_play_button(self, group):
+
+    if self.intro_played[group] == False and self.state[1][group] == 0:
+
+      # to frame panw sto opoio 8a einai ta koumpia
+      frame = self.new_frame()
+      self.set_frame(frame)
+
+      # ta koumpia tou para8urou
+      buttonVec = []
+      buttonText = []
+
+
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video,group))
+      buttonVec.append(playButton)
+      buttonText.append('ΑΝΑΠΑΡΑΓΩΓΗ ΟΠΤΙΚΟΑΚΟΥΣΤΙΚΟΥ ΥΛΙΚΟΥ')
+
+
+      xNum = 1
+      yNum = len(buttonVec)
+
+      xEff = 1.0
+      yEff = 1.0
+
+      GP = 0.05
+
+      xWithGuard = xEff/xNum
+      xG = GP*xWithGuard
+      xB = xWithGuard-xG
+
+      yWithGuard = yEff/yNum
+      yG = GP*yWithGuard
+      yB = yWithGuard-yG
+
+      counter = 0
+      for xx in range(xNum):
+        for yy in range(yNum):
+          thisX = xG/2+xx*xWithGuard
+          thisY = yG/2+yy*yWithGuard
+
+          buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+          buttonVec[counter].config(text=buttonText[counter])
+          buttonVec[counter].update()
+
+          thisWidth = buttonVec[counter].winfo_width()
+          thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].update()
+
+          counter = counter+1
+    else:
+      self.game(group)
 
 
   ##############################################################################
