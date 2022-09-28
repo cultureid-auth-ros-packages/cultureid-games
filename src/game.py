@@ -618,6 +618,9 @@ class GuiGame():
 
         counter = counter+1
 
+    # Celebrate mf
+    self.celebrate()
+
 
   ##############################################################################
   def display_message(self, message):
@@ -745,8 +748,6 @@ class GuiGame():
     self.reset_state()
     self.save_state_to_file()
 
-    # Celebrate mf
-    self.celebrate()
 
   ##############################################################################
   # exit button
@@ -821,10 +822,12 @@ class GuiGame():
       self.clock_end[self.state[0]] = time.time()
       duration = self.clock_end[self.state[0]]-self.clock_start[self.state[0]]
       self.stats[2][self.state[0]] = self.stats[2][self.state[0]] + duration
+      rospy.logwarn('duration 0 = %f', duration)
     else:
       self.clock_end[self.previous_group] = time.time()
       duration = self.clock_end[self.previous_group]-self.clock_start[self.previous_group]
       self.stats[2][self.previous_group] = self.stats[2][self.previous_group] + duration
+      rospy.logwarn('duration 1 = %f', duration)
 
     self.previous_group = self.state[0]
 
