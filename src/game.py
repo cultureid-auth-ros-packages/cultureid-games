@@ -7,9 +7,6 @@ import os
 import time
 import rospy
 import tf
-from std_msgs.msg import Empty
-from std_srvs.srv import Empty as srv_empty
-from std_msgs.msg import Int8
 import Tkinter
 import numpy as np
 import time
@@ -24,6 +21,9 @@ from PIL import Image,ImageTk
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseFeedback, MoveBaseResult
 
+from std_msgs.msg import Empty
+from std_srvs.srv import Empty as srv_empty
+from std_msgs.msg import Int8
 from nav_msgs.msg import Path
 from geometry_msgs.msg import Pose, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist, Vector3
@@ -969,17 +969,8 @@ class GuiGame():
   ##############################################################################
   def goto_goal_pose(self):
 
-    # Orientation is quaternion
-    goal = MoveBaseGoal()
-    goal.target_pose.header.frame_id = 'map'
-    goal.target_pose.pose.position.x = self.goal_pose[0]
-    goal.target_pose.pose.position.y = self.goal_pose[1]
-    goal.target_pose.pose.position.z = self.goal_pose[2]
-    goal.target_pose.pose.orientation.x = self.goal_pose[3]
-    goal.target_pose.pose.orientation.y = self.goal_pose[4]
-    goal.target_pose.pose.orientation.z = self.goal_pose[5]
-    goal.target_pose.pose.orientation.w = self.goal_pose[6]
-
+    # Construct goal msg
+    goal_msg = self.make_goal_msg(self.goal_pose)
 
     # Clear and come with me
     self.display_message('ΠΑΡΑΚΑΛΩ ΑΠΟΜΑΚΡΥΝΘΕΙΤΕ')
@@ -990,7 +981,7 @@ class GuiGame():
     self.display_message('ΠΑΡΑΚΑΛΩ ΕΛΑΤΕ ΜΑΖΙ ΜΟΥ')
 
     rospy.logwarn('sending goal and waiting for result')
-    self.action_client.send_goal(goal)
+    self.action_client.send_goal(goal_msg)
     self.action_client.wait_for_result()
 
     # TODO unload params here and load new params (?)
@@ -1192,7 +1183,7 @@ class GuiGame():
 
     # Booleans for playing the voice-over of a question only once;
     # otherwise it breaks balls. Init to false for all.
-    # (BTW PYTHON USES pass by reference if: self.V_played = self.V !!!)
+    # (BTW PYTHON USES copy by reference in `self.V_played = self.V` !!!)
     self.V_played = []
     for i in range(len(self.V)):
       self.V_played.append([])
@@ -1249,17 +1240,8 @@ class GuiGame():
       return
 
     # Set pose; from normal configuration
-    self.pose_ = PoseWithCovarianceStamped()
-    self.pose_.pose.pose.position.x = self.start_pose[0]
-    self.pose_.pose.pose.position.y = self.start_pose[1]
-    self.pose_.pose.pose.position.z = self.start_pose[2]
-    self.pose_.pose.pose.orientation.x = self.start_pose[3]
-    self.pose_.pose.pose.orientation.y = self.start_pose[4]
-    self.pose_.pose.pose.orientation.z = self.start_pose[5]
-    self.pose_.pose.pose.orientation.w = self.start_pose[6]
-    self.pose_.header.stamp = rospy.Time.now()
-    self.pose_.header.frame_id = 'map'
-    self.set_amcl_init_pose(self.pose_)
+    self.pose_ = self.make_pose_msg(self.start_pose)
+    self.set_amcl_init_pose_msg(self.pose_)
 
     # Check if the user wants to restore the last game if abruptly hung up
     if self.in_state != '' and self.in_stats != '':
@@ -1327,6 +1309,38 @@ class GuiGame():
 
 
   ##############################################################################
+  def make_goal_msg(self, target_pose):
+    goal = MoveBaseGoal()
+    goal.target_pose.pose.position.x = target_pose[0]
+    goal.target_pose.pose.position.y = target_pose[1]
+    goal.target_pose.pose.position.z = target_pose[2]
+    goal.target_pose.pose.orientation.x = target_pose[3]
+    goal.target_pose.pose.orientation.y = target_pose[4]
+    goal.target_pose.pose.orientation.z = target_pose[5]
+    goal.target_pose.pose.orientation.w = target_pose[6]
+    goal.target_pose.header.frame_id = 'map'
+    goal.target_pose.header.stamp = rospy.Time.now()
+
+    return goal
+
+
+  ##############################################################################
+  def make_pose_msg(self, in_pose):
+    out_pose = PoseWithCovarianceStamped()
+    out_pose.pose.pose.position.x = in_pose[0]
+    out_pose.pose.pose.position.y = in_pose[1]
+    out_pose.pose.pose.position.z = in_pose[2]
+    out_pose.pose.pose.orientation.x = in_pose[3]
+    out_pose.pose.pose.orientation.y = in_pose[4]
+    out_pose.pose.pose.orientation.z = in_pose[5]
+    out_pose.pose.pose.orientation.w = in_pose[6]
+    out_pose.header.frame_id = 'map'
+    out_pose.header.stamp = rospy.Time.now()
+
+    return out_pose
+
+
+  ##############################################################################
   def new_canvas(self):
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='white')
@@ -1374,34 +1388,16 @@ class GuiGame():
       self.restore_state()
 
       # Set pose; from saved file
-      self.pose_ = PoseWithCovarianceStamped()
-      self.pose_.pose.pose.position.x = self.in_pose[0]
-      self.pose_.pose.pose.position.y = self.in_pose[1]
-      self.pose_.pose.pose.position.z = self.in_pose[2]
-      self.pose_.pose.pose.orientation.x = self.in_pose[3]
-      self.pose_.pose.pose.orientation.y = self.in_pose[4]
-      self.pose_.pose.pose.orientation.z = self.in_pose[5]
-      self.pose_.pose.pose.orientation.w = self.in_pose[6]
-      self.pose_.header.stamp = rospy.Time.now()
-      self.pose_.header.frame_id = 'map'
+      self.pose_ = self.make_pose_msg(self.in_pose)
 
     if c == 1:
       self.reset_state()
 
       # Set pose; from normal configuration
-      self.pose_ = PoseWithCovarianceStamped()
-      self.pose_.pose.pose.position.x = self.start_pose[0]
-      self.pose_.pose.pose.position.y = self.start_pose[1]
-      self.pose_.pose.pose.position.z = self.start_pose[2]
-      self.pose_.pose.pose.orientation.x = self.start_pose[3]
-      self.pose_.pose.pose.orientation.y = self.start_pose[4]
-      self.pose_.pose.pose.orientation.z = self.start_pose[5]
-      self.pose_.pose.pose.orientation.w = self.start_pose[6]
-      self.pose_.header.stamp = rospy.Time.now()
-      self.pose_.header.frame_id = 'map'
+      self.pose_ = self.make_pose_msg(self.start_pose)
 
 
-    self.set_amcl_init_pose(self.pose_)
+    self.set_amcl_init_pose_msg(self.pose_)
     self.save_state_to_file()
     self.select_group_init()
 
@@ -1505,7 +1501,7 @@ class GuiGame():
 
 
   ##############################################################################
-  def set_amcl_init_pose(self, pose):
+  def set_amcl_init_pose_msg(self, pose):
     self.amcl_init_pose_pub.publish(pose)
 
 
