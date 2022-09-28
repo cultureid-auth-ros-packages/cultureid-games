@@ -1105,6 +1105,8 @@ class GuiGame():
 
         counter = counter+1
 
+    # Voice of goddess
+    call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/try_again.mp3'])
 
   ##############################################################################
   def init(self):
