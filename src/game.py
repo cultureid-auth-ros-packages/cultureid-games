@@ -1478,11 +1478,12 @@ class GuiGame():
       this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
       buttonText.append(this_group_name)
 
+
     # Swapped order so that buttons are placed horizontally
     xNum,yNum = self.get_x_y_dims(len(buttonVec))
 
     xEff = 1.0
-    yEff = 1.0
+    yEff = 0.8
 
     GP = 0.05
 
@@ -1508,10 +1509,47 @@ class GuiGame():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
+          print counter, thisX, thisY, yB, xB
           buttonVec[counter].config(font=("Helvetica", 30))
           buttonVec[counter].update()
 
         counter = counter+1
+
+
+    # EXIT button
+    exit_button = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
+    buttonVec.append(exit_button)
+    buttonText.append('ΕΞΟΔΟΣ')
+
+    xEff = 1.0
+    yEff = 0.2
+
+    GP = 0.05
+
+    xNum = xNum+1
+    yNum = yNum+1
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    thisX = xG/2+xx*xWithGuard+1-xEff
+    thisY = yG/2+yy*yWithGuard+1-yEff
+
+    buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+    buttonVec[counter].config(text=buttonText[counter])
+    buttonVec[counter].update()
+
+    thisWidth = buttonVec[counter].winfo_width()
+    thisHeight = buttonVec[counter].winfo_height()
+    print counter, thisX, thisY, yB, xB
+    buttonVec[counter].config(font=("Helvetica", 30))
+    buttonVec[counter].update()
+
 
 
   ##############################################################################
@@ -1538,10 +1576,10 @@ class GuiGame():
     self.game(group)
 
 
-
   ##############################################################################
   def show_intro_video_play_button(self, group):
 
+    # if the introduction video has not been played yet
     if self.intro_played[group] == False and self.state[1][group] == 0:
 
       # to frame panw sto opoio 8a einai ta koumpia
