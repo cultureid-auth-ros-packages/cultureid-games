@@ -28,7 +28,6 @@ from geometry_msgs.msg import Pose, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist, Vector3
 
 
-
 class GuiGame():
 
 ################################################################################
@@ -49,9 +48,6 @@ class GuiGame():
 
     self.init_params()
 
-    # For measuring group times
-    self.previous_group = -1
-    self.global_clock = time.time()
 
     # Let's go
     self.init()
@@ -813,24 +809,6 @@ class GuiGame():
     rospy.logwarn('Current group:  %d' % self.state[0])
     rospy.logwarn('Previous group: %d' % self.previous_group)
 
-    # Start the clock for the new group at every group change
-    if self.state[0] != self.previous_group:
-      self.clock_start[self.state[0]] = time.time()
-
-    # End the clock for the previous group
-    if self.previous_group == -1:
-      self.clock_end[self.state[0]] = time.time()
-      duration = self.clock_end[self.state[0]]-self.clock_start[self.state[0]]
-      self.stats[2][self.state[0]] = self.stats[2][self.state[0]] + duration
-      rospy.logwarn('duration 0 = %f', duration)
-    else:
-      self.clock_end[self.previous_group] = time.time()
-      duration = self.clock_end[self.previous_group]-self.clock_start[self.previous_group]
-      self.stats[2][self.previous_group] = self.stats[2][self.previous_group] + duration
-      rospy.logwarn('duration 1 = %f', duration)
-
-    self.previous_group = self.state[0]
-
     # Save state to file
     self.save_state_to_file()
 
@@ -841,7 +819,6 @@ class GuiGame():
     frame = self.group_buttons(self.state[0], frame)
     frame = self.exit_button(frame)
 
-
     if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
       self.continue_game(frame)
     else:
@@ -850,6 +827,12 @@ class GuiGame():
 
   ##############################################################################
   def game_over(self, group):
+
+    # Stop the clock for the current group
+    self.groups_clocks_stop[group] = rospy.Time.now()
+
+    # Calculate duration FROM START TO FINISH
+    self.stats[2][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
 
     # Save state to file
     self.save_state_to_file()
@@ -1263,6 +1246,14 @@ class GuiGame():
     self.intro_played = [False] * len(self.Q)
 
 
+    # For measuring group times
+    self.previous_group = -1
+    self.groups_clocks_start = [0] * len(self.Q)
+    self.groups_clocks_stop = [0] * len(self.Q)
+
+
+
+
   ##############################################################################
   def insufficient_answer(self):
     rospy.logwarn('this answer is insufficient')
@@ -1453,8 +1444,8 @@ class GuiGame():
     self.stats[1] = [0] * len(self.Q)
     self.stats[2] = [0] * len(self.Q)
 
-    self.clock_start = [0] * len(self.Q)
-    self.clock_end = [0] * len(self.Q)
+    self.groups_clocks_start = [0] * len(self.Q)
+    self.groups_clocks_stop = [0] * len(self.Q)
 
 
   ##############################################################################
@@ -1469,6 +1460,8 @@ class GuiGame():
     frame = self.new_frame()
     self.set_frame(frame)
 
+
+    # Group buttons ------------------------------------------------------------
     buttonVec = []
     buttonText = []
 
@@ -1509,20 +1502,19 @@ class GuiGame():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
-          print counter, thisX, thisY, yB, xB
           buttonVec[counter].config(font=("Helvetica", 30))
           buttonVec[counter].update()
 
         counter = counter+1
 
 
-    # EXIT button
+    # EXIT button --------------------------------------------------------------
     exit_button = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
     buttonVec.append(exit_button)
     buttonText.append('ΕΞΟΔΟΣ')
 
     xEff = 1.0
-    yEff = 0.2
+    yEff = 0.3
 
     GP = 0.05
 
@@ -1538,7 +1530,7 @@ class GuiGame():
     yB = yWithGuard-yG
 
     thisX = xG/2+xx*xWithGuard+1-xEff
-    thisY = yG/2+yy*yWithGuard+1-yEff
+    thisY = yG/2+yy*yWithGuard+1-yEff+GP
 
     buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
     buttonVec[counter].config(text=buttonText[counter])
@@ -1546,7 +1538,6 @@ class GuiGame():
 
     thisWidth = buttonVec[counter].winfo_width()
     thisHeight = buttonVec[counter].winfo_height()
-    print counter, thisX, thisY, yB, xB
     buttonVec[counter].config(font=("Helvetica", 30))
     buttonVec[counter].update()
 
@@ -1573,11 +1564,20 @@ class GuiGame():
     call(['vlc', '--no-repeat','--fullscreen','--play-and-exit', \
         self.dir_media + '/intro_' + str(group) + '.mp4'])
 
+    self.intro_played[group] = True
     self.game(group)
 
 
   ##############################################################################
   def show_intro_video_play_button(self, group):
+
+    # Start and stop clocks:
+    # stop the clock for the previous group (if one existed), and
+    # start the clock for the current group
+    self.groups_clocks_start[group] = rospy.Time.now()
+
+    self.previous_group = group
+
 
     # if the introduction video has not been played yet
     if self.intro_played[group] == False and self.state[1][group] == 0:
@@ -1629,6 +1629,7 @@ class GuiGame():
 
           counter = counter+1
     else:
+
       self.game(group)
 
 
