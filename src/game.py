@@ -783,8 +783,8 @@ class GuiGame():
     time = stats[2]
 
     count = []
-    for i in range(0,len(correct)):
-      count.append((correct[i]-incorrect[i])/(time[i]+0.01))
+    for i in range(0,len(self.Q)):
+      count.append( (correct[i]-incorrect[i]) / len(self.Q[i]) / (time[i]+0.01) )
 
     max_v = max(count)
     gs = [i for i,j in enumerate(count) if j == max_v]
