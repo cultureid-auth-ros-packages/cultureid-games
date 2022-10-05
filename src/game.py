@@ -34,9 +34,12 @@ class AMTHGame():
   ##############################################################################
   # constructor
   ##############################################################################
-  def __init__(self, root):
+  def __init__(self):
+  #def __init__(self,root):
 
-    self.root = root
+    self.root = Tkinter.Tk()
+    self.root.attributes('-fullscreen',True)
+    #self.root = root
 
     # Sets the pose estimate of amcl
     self.amcl_init_pose_pub = \
@@ -54,7 +57,7 @@ class AMTHGame():
     self.init()
 
     # Seems that the mainloop should be placed here; otherwise throws error
-    rospy.logwarn('AMTHGAME root mainloop')
+    #rospy.logwarn('AMTHGAME root mainloop')
     self.root.mainloop()
 
 
@@ -1411,10 +1414,26 @@ class AMTHGame():
 
   ##############################################################################
   def kill_root(self):
+
+    # Stop the clock for all groups
+    for group in range(len(self.Q)):
+      self.groups_clocks_stop[group] = rospy.Time.now()
+
+      # Calculate duration FROM START TO FINISH
+      if self.groups_clocks_start[group] != 0:
+        self.stats[2][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
+      else:
+        self.stats[2][group] = 0
+
     self.save_state_to_file()
-    call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
+    #call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
+
+    # This is necessary so that control is relinquished to class AMTHGames.
+    # Who would have thought
+    self.root.quit()
     self.root.destroy()
-    rospy.logerr('game over')
+
+    rospy.logerr('This game is over')
     #os._exit(os.EX_OK)
 
 
@@ -1483,13 +1502,6 @@ class AMTHGame():
   def pose_callback(self, msg):
     rospy.logwarn('Pose callback')
     self.pose_ = PoseWithCovarianceStamped(msg)
-
-
-  ##############################################################################
-  def quit_game(self):
-    self.root.destroy()
-    rospy.signal_shutdown('game over')
-    os._exit(os.EX_OK)
 
 
   ##############################################################################

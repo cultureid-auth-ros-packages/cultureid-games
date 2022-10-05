@@ -46,19 +46,18 @@ class AMTHGames():
     self.root = Tkinter.Tk()
     self.root.attributes('-fullscreen',True)
 
-    # Load params
+    # Load params for this class
     self.init_params()
 
-    # Let's go: choose a quartet of games to begin with
-    self.choose_game_screen()
+    # Let's go: choose a set of games to begin with
+    self.choose_gameset_screen()
 
-    # Seems that the mainloop should be placed here; otherwise throws error
-    rospy.logwarn('AMTHGAMES root mainloop')
+    # DJ...SPIN THAT SHIT
     self.root.mainloop()
 
 
   ##############################################################################
-  def choose_game_screen(self):
+  def choose_gameset_screen(self):
 
     # new canvas
     canvas = self.new_canvas()
@@ -223,15 +222,22 @@ class AMTHGames():
 
     rospy.loginfo('[%s] Starting game %s', self.pkg_name, self.quartet_codes[q])
 
-    # Load params for this specific game
+    # Load params for this specific game (`game_` + self.quartet_codes[q])
     rospy.loginfo('[%s] Loading params', self.pkg_name)
     self.load_game_params(self.quartet_codes[q])
     rospy.loginfo('[%s] Done loading params', self.pkg_name)
 
-    # Play this specific game
-    one_game = game.AMTHGame(self.root)
+
+    # Play this specific game. Its questions, answers, etc have been uploaded
+    # and set
+    one_game = game.AMTHGame()
 
     rospy.logerr('[%s] Game %s over', self.pkg_name, self.quartet_codes[q])
+
+
+    # Total games over
+    rospy.logerr('[%s] The end is here kids', self.pkg_name)
+
 
 
   ##############################################################################
@@ -258,8 +264,9 @@ class AMTHGames():
       rospy.logerr('[%s] tl_dot_yaml not set; aborting', self.pkg_name)
       return
 
-    ns = self.pkg_name + '_games/'
 
+    # Start loading params necessary for game game_id
+    ns = self.pkg_name + '_games/'
 
     for i in range(len(self.tl_variables)):
       rospy.set_param(\
@@ -274,8 +281,6 @@ class AMTHGames():
     for i in range(len(self.tl_files)):
       self.load_params_from_yaml(\
           self.pkg_ap + self.tl_files[i] + game_id + '.yaml', ns)
-
-
 
 
   ##############################################################################

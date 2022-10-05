@@ -39,7 +39,7 @@ A: [
 # The naming convention is AB.png, where A=group number, and B = question number
 # (zero-based indexing)
 I: [
-  ['00.png', '', '',''],
+  ['', '', '',''],
   ['', ''],
   ['', '', ''],
   ['']
@@ -49,7 +49,7 @@ I: [
 # The naming convention is AB.mp3, where A=group number, and B = question number
 # (zero-based indexing)
 V: [
-  ['00.mp3', '01.mp3', '02.mp3','03.mp3'],
+  ['', '', '',''],
   ['', ''],
   ['', '', ''],
   ['']
