@@ -170,6 +170,115 @@ class GuiGame():
 
 
   ##############################################################################
+  def ask_to_skip_group(self, group):
+
+    # new canvas
+    canvas = self.new_canvas()
+    self.set_canvas(canvas)
+
+    # to frame panw sto opoio 8a einai ta koumpia
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # Show Q
+    buttonVec = []
+    buttonText = []
+
+
+    QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
+    buttonVec.append(QButton)
+    buttonText.append('Επιθυμείτε να τερματίσετε το παρόν \nπαιχνίδι για το group ' + str(group) + '?')
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1.0
+    yEff = 0.3
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard+0.1
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+
+        buttonVec[counter].config(font=("Helvetica", 20))
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+
+
+    #######################################
+    # ta koumpia tou para8urou apanthseis
+    buttonVec = []
+    buttonText = []
+
+
+    # Show choices
+    answer_txt = ['ΝΑΙ, ΠΑΜΕ ΠΑΡΑΚΑΤΩ', 'ΟΧΙ, ΘΕΛΩ ΝΑ ΣΥΝΕΧΙΣΩ ΝΑ ΠΑΙΖΩ']
+    for i in range(2):
+      buttonText.append(answer_txt[i])
+      if i == 0:
+        this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.quit_group,group))
+      else:
+        this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.game,group))
+
+      buttonVec.append(this_butt)
+
+    xNum,yNum = self.get_x_y_dims(len(buttonVec))
+
+
+    xEff = 1.0
+    yEff = 0.6
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+
+        if counter < len(buttonVec):
+          thisX = xG/2+xx*xWithGuard
+          thisY = yG/2+yy*yWithGuard+1-yEff
+
+          buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+          buttonVec[counter].config(text=buttonText[counter])
+          buttonVec[counter].update()
+
+          thisWidth = buttonVec[counter].winfo_width()
+          thisHeight = buttonVec[counter].winfo_height()
+          buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].update()
+
+        counter += 1
+
+
+  ##############################################################################
   # Play end song
   def celebrate(self):
     rospy.logwarn('watch me im twerking')
@@ -834,6 +943,9 @@ class GuiGame():
     # Calculate duration FROM START TO FINISH
     self.stats[2][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
 
+    # Check if game_over was issued due to skip or natural causes
+    # TODO
+
     # Save state to file
     self.save_state_to_file()
 
@@ -987,7 +1099,7 @@ class GuiGame():
 
     for i in range(0,len(self.Q)):
       if i == highlight_group:
-        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='green', command=partial(self.show_intro_video_play_button,i))
+        this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',activeforeground='#E0B548',activebackground='green', command=partial(self.ask_to_skip_group,i))
       else:
         this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video_play_button,i))
 
@@ -1385,6 +1497,25 @@ class GuiGame():
     self.root.destroy()
     rospy.signal_shutdown('game over')
     os._exit(os.EX_OK)
+
+
+  ##############################################################################
+  def quit_group(self, group):
+
+    # How many answered correctly
+    ac = self.state[1][group]
+
+    # How many questions in total
+    tq = len(self.Q[group])
+
+    # This many questions answered (correct + skipped)
+    self.state[1][group] = tq
+
+    # This many incorrect answers (skipped = incorrect)
+    self.stats[1][group] += tq-ac
+
+    # Game over my friend
+    self.game_over(group)
 
 
   ##############################################################################
