@@ -166,6 +166,54 @@ class AMTHGames():
 
 
   ##############################################################################
+  def display_message(self, message):
+
+    frame = self.new_frame()
+    self.set_frame(frame)
+
+    # ta koumpia tou para8urou
+    buttonVec = []
+    buttonText = []
+
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
+    buttonVec.append(playButton)
+    buttonText.append(message)
+
+    xNum = 1
+    yNum = len(buttonVec)
+
+    xEff = 1
+    yEff = 1
+
+    GP = 0.05
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    counter = 0
+    for xx in range(xNum):
+      for yy in range(yNum):
+        thisX = xG/2+xx*xWithGuard
+        thisY = yG/2+yy*yWithGuard
+
+        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        buttonVec[counter].config(text=buttonText[counter])
+        buttonVec[counter].update()
+
+        thisWidth = buttonVec[counter].winfo_width()
+        thisHeight = buttonVec[counter].winfo_height()
+        buttonVec[counter].config(font=("Helvetica", 20))
+        buttonVec[counter].update()
+
+        counter = counter+1
+
+
+  ##############################################################################
   def get_x_y_dims(self,desiredNum):
 
     side1 = int(desiredNum/int(desiredNum**0.5))
@@ -181,6 +229,28 @@ class AMTHGames():
     side2 = np.max([sideSmall,sideLarge])
 
     return side1,side2
+
+
+  ##############################################################################
+  def goto_goal_pose(self):
+
+    # Construct goal msg
+    goal_msg = self.make_goal_msg(self.goal_pose)
+
+    cc_sleep_time = 3.0
+
+    # Clear and come with me
+    self.display_message('ΠΑΡΑΚΑΛΩ ΑΠΟΜΑΚΡΥΝΘΕΙΤΕ')
+    rospy.loginfo('Waiting for %f sec before I clear costmaps', cc_sleep_time)
+    rospy.sleep(cc_sleep_time)
+    rospy.wait_for_service('/move_base/clear_costmaps')
+    rospy.loginfo('Waiting for %f sec after I clear costmaps', cc_sleep_time)
+    rospy.sleep(cc_sleep_time)
+    self.display_message('ΠΑΡΑΚΑΛΩ ΕΛΑΤΕ ΜΑΖΙ ΜΟΥ')
+
+    rospy.loginfo('[%s] Sending goal and waiting for result', self.pkg_name)
+    self.action_client.send_goal(goal_msg)
+    self.action_client.wait_for_result()
 
 
   ##############################################################################
@@ -208,12 +278,26 @@ class AMTHGames():
       rospy.logerr('[%s] quartet_codes not set; aborting', self.pkg_name)
       return
 
+    # Which games have been played. This is needed because:
+    # The first game is played (supposed to, anyway) from the pose of the first
+    # game: the guide has already placed it there;
+    # when the game is finished, if a new game is to be played (picking up
+    # from the last game (may not be the first), then the robot needs to move
+    # on its own to that game's pose. The same applies if the last two games
+    # have the same code
+    self.quartet_codes_played = []
+
+    # Get a move_base action client
+    self.action_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+    rospy.loginfo('[%s] Connecting to move_base...', self.pkg_name)
+    self.action_client.wait_for_server()
+
 
   ##############################################################################
   def kill_root(self):
     call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
     self.root.destroy()
-    rospy.logerr('GAMES OVER')
+    rospy.logerr('[%s] Killing everything', self.pkg_name)
     os._exit(os.EX_OK)
 
 
@@ -228,16 +312,29 @@ class AMTHGames():
     rospy.loginfo('[%s] Done loading params', self.pkg_name)
 
 
+    # Which game is this?
+    self.quartet_codes_played.append(self.quartet_codes[q])
+
+    # The parameters have been set, but we are at the end of game
+    if len(self.quartet_codes_played) > 1 and \
+        self.quartet_codes_played[-1] != self.quartet_codes_played[-2]:
+      self.goal_pose = rospy.get_param('~start_pose', '')
+
+      if self.goal_pose == '':
+        rospy.logerr('[%s] goal_pose for game %s not set; aborting', \
+            self.pkg_name, self.quartet_codes[q])
+        self.kill_root()
+      else:
+        self.goto_goal_pose()
+
     # Play this specific game. Its questions, answers, etc have been uploaded
     # and set
     one_game = game.AMTHGame()
 
     rospy.logerr('[%s] Game %s over', self.pkg_name, self.quartet_codes[q])
 
-
-    # Total games over
-    rospy.logerr('[%s] The end is here kids', self.pkg_name)
-
+    # This game is over. Would you care to play another?
+    self.choose_gameset_screen()
 
 
   ##############################################################################
@@ -290,6 +387,23 @@ class AMTHGames():
         rosparam.load_file(file_path,default_namespace=myns)
     for params, ns in paramlist:
       rosparam.upload_params(ns,params)
+
+
+  ##############################################################################
+  def make_goal_msg(self, target_pose):
+
+    goal = MoveBaseGoal()
+    goal.target_pose.pose.position.x = target_pose[0]
+    goal.target_pose.pose.position.y = target_pose[1]
+    goal.target_pose.pose.position.z = target_pose[2]
+    goal.target_pose.pose.orientation.x = target_pose[3]
+    goal.target_pose.pose.orientation.y = target_pose[4]
+    goal.target_pose.pose.orientation.z = target_pose[5]
+    goal.target_pose.pose.orientation.w = target_pose[6]
+    goal.target_pose.header.frame_id = 'map'
+    goal.target_pose.header.stamp = rospy.Time.now()
+
+    return goal
 
 
   ##############################################################################

@@ -17,10 +17,6 @@ from PIL import Image,ImageTk
 import rospy
 import tf
 
-# Sending goals etc
-import actionlib
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseFeedback, MoveBaseResult
-
 from std_msgs.msg import Empty
 from std_srvs.srv import Empty as srv_empty
 from std_msgs.msg import Int8
@@ -1062,27 +1058,6 @@ class AMTHGame():
 
 
   ##############################################################################
-  def goto_goal_pose(self):
-
-    # Construct goal msg
-    goal_msg = self.make_goal_msg(self.goal_pose)
-
-    # Clear and come with me
-    self.display_message('ΠΑΡΑΚΑΛΩ ΑΠΟΜΑΚΡΥΝΘΕΙΤΕ')
-    rospy.sleep(3.0)
-    rospy.wait_for_service('/move_base/clear_costmaps')
-    rospy.ServiceProxy('/move_base/clear_costmaps', srv_empty)
-    rospy.sleep(2.0)
-    self.display_message('ΠΑΡΑΚΑΛΩ ΕΛΑΤΕ ΜΑΖΙ ΜΟΥ')
-
-    rospy.logwarn('sending goal and waiting for result')
-    self.action_client.send_goal(goal_msg)
-    self.action_client.wait_for_result()
-
-    # TODO unload params here and load new params (?)
-
-
-  ##############################################################################
   # group buttons are displayed in each screen for switching between groups
   def group_buttons(self, highlight_group, frame):
 
@@ -1268,7 +1243,6 @@ class AMTHGame():
     self.rfid_file = rospy.get_param('~rfid_file', '')
     self.statefile = rospy.get_param('~statefile', '')
     self.start_pose = rospy.get_param('~start_pose', '')
-    self.goal_pose = rospy.get_param('~goal_pose', '')
 
     # Read [Q]uestions, [C]hoices, correct [A]nswers, [I]mages
     self.Q = rospy.get_param('~Q', '')
@@ -1322,10 +1296,6 @@ class AMTHGame():
 
     if self.start_pose == '':
       rospy.logerr('[cultureid_games_N] start_pose not set; aborting')
-      return
-
-    if self.goal_pose == '':
-      rospy.logerr('[cultureid_games_N] goal_pose not set; aborting')
       return
 
     if self.Q == '':
@@ -1435,22 +1405,6 @@ class AMTHGame():
 
     rospy.logerr('This game is over')
     #os._exit(os.EX_OK)
-
-
-  ##############################################################################
-  def make_goal_msg(self, target_pose):
-    goal = MoveBaseGoal()
-    goal.target_pose.pose.position.x = target_pose[0]
-    goal.target_pose.pose.position.y = target_pose[1]
-    goal.target_pose.pose.position.z = target_pose[2]
-    goal.target_pose.pose.orientation.x = target_pose[3]
-    goal.target_pose.pose.orientation.y = target_pose[4]
-    goal.target_pose.pose.orientation.z = target_pose[5]
-    goal.target_pose.pose.orientation.w = target_pose[6]
-    goal.target_pose.header.frame_id = 'map'
-    goal.target_pose.header.stamp = rospy.Time.now()
-
-    return goal
 
 
   ##############################################################################
