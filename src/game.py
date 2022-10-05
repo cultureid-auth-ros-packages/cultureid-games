@@ -4,17 +4,18 @@
 import sys
 import threading
 import os
-import rospy
-import tf
-import Tkinter
 import numpy as np
 import time
 from subprocess import call, Popen
 from functools import partial
-from sys import argv
 import random
+import Tkinter
 import tkFont
 from PIL import Image,ImageTk
+
+# Import ROS modules
+import rospy
+import tf
 
 # Sending goals etc
 import actionlib
@@ -28,32 +29,32 @@ from geometry_msgs.msg import Pose, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist, Vector3
 
 
-class GuiGame():
+class AMTHGame():
 
-################################################################################
-# constructor
-################################################################################
-  def __init__(self):
+  ##############################################################################
+  # constructor
+  ##############################################################################
+  def __init__(self, root):
 
-    self.root = Tkinter.Tk()
-    self.root.attributes('-fullscreen',True)
+    self.root = root
 
     # Sets the pose estimate of amcl
     self.amcl_init_pose_pub = \
         rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
 
     # Publishes raw velocity commands to the wheels of the base
+    # [for celebrations]
     self.raw_velocity_commands_pub = \
         rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
 
+    # Load and set
     self.init_params()
-
 
     # Let's go
     self.init()
 
     # Seems that the mainloop should be placed here; otherwise throws error
-    rospy.logwarn('root mainloop')
+    rospy.logwarn('AMTHGAME root mainloop')
     self.root.mainloop()
 
 
@@ -73,13 +74,6 @@ class GuiGame():
     buttonText = []
 
 
-    # If this question requires a rfid card as an answer then press the question
-    # button and bring the card to the reader;
-    # otherwise no need to press the question button
-    # The -1 is a workaround because the check_answer_given function is called
-    # for all types of questions, but one may find oneself in the situation
-    # where the question does not call for a rfid card but pressing the question
-    # button opens up the reader, hanging execution
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
     buttonText.append('Υπάρχει αποθηκευμένο παιχνίδι. Συνέχεια?')
@@ -184,10 +178,9 @@ class GuiGame():
     buttonVec = []
     buttonText = []
 
-
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append('Επιθυμείτε να τερματίσετε το παρόν \nπαιχνίδι για το group ' + str(group) + '?')
+    buttonText.append('Επιθυμείτε να τερματίσετε το παρόν \nπαιχνίδι για το group ' + str(group+1) + '?')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -724,7 +717,7 @@ class GuiGame():
         counter = counter+1
 
     # Celebrate mf
-    self.celebrate()
+    #self.celebrate()
 
 
   ##############################################################################
@@ -1421,8 +1414,8 @@ class GuiGame():
     self.save_state_to_file()
     call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
     self.root.destroy()
-    print('game over')
-    os._exit(os.EX_OK)
+    rospy.logerr('game over')
+    #os._exit(os.EX_OK)
 
 
   ##############################################################################
@@ -1769,30 +1762,3 @@ class GuiGame():
     with open(file_str,'w') as f:
       f.write(content)
       f.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-################################################################################
-# main
-################################################################################
-if __name__ == '__main__':
-
-  rospy.init_node('gui_game_node')
-
-  try:
-    gga = GuiGame()
-    rospy.spin()
-
-  except rospy.ROSInterruptException:
-    print("SHUTTING DOWN")
-    pass

@@ -34,11 +34,32 @@ A: [
   [0]
 ]
 
+
+# Image to display alongside the Question
+# The naming convention is AB.png, where A=group number, and B = question number
+# (zero-based indexing)
+I: [
+  ['00.png', '', '',''],
+  ['', ''],
+  ['', '', ''],
+  ['']
+]
+
+# Speak the question
+# The naming convention is AB.mp3, where A=group number, and B = question number
+# (zero-based indexing)
+V: [
+  ['00.mp3', '01.mp3', '02.mp3','03.mp3'],
+  ['', ''],
+  ['', '', ''],
+  ['']
+]
+
 # RFID measurements file
 rfid_file: 'results_001625143965.txt'
 
-# Starting pose for game b
+# Starting pose for game a
 start_pose: [11.7975408942, 5.96052106997, 0,0,0, -0.999693209985, 0.0247686477145]
 
-# Goal pose at the end of game b
+# Goal pose at the end of game a
 goal_pose: [11.7975408942, 5.96052106997, 0,0,0, -0.999693209985, 0.0247686477145]
