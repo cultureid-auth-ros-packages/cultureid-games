@@ -1,0 +1,18 @@
+# specific variables---to be prefixed and sufixed at runtime
+tl_variables: [
+  ['dir_media',           '/gui_resources/media_'],
+  ['cel_media',           '/gui_resources/celebrations_media_'],
+  ['dir_scripts',         '/gui_resources/scripts_'],
+  ['rfid_java_exec_dir',  '/rfid_detection_resources/game_']
+]
+
+# load specific variable to be prefixed, and suffixed with '.yaml'
+tl_dot_yaml: [
+  ['statefile', '/config/state_']
+]
+
+# specific .yaml files---to be prefixed and sufixed at runtime
+tl_files: [
+  '/config/params_',
+  '/config/state_'
+]

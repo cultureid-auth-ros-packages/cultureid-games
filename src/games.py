@@ -28,6 +28,10 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import Pose, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist, Vector3
 
+import roslib
+roslib.load_manifest("rosparam")
+import rosparam
+
 # Class AMTHGame
 import game
 
@@ -65,7 +69,7 @@ class AMTHGames():
     self.set_frame(frame)
 
     # All the choices for this question
-    choices = self.quartet_names
+    choices = self.quartet_titles
 
     # Show Q
     buttonVec = []
@@ -183,7 +187,27 @@ class AMTHGames():
   ##############################################################################
   def init_params(self):
 
-    self.quartet_names = rospy.get_param('~quartet_names', '')
+    self.pkg_name = rospy.get_param('~pkg_name', '')
+    self.pkg_ap = rospy.get_param('~pkg_ap', '')
+    self.quartet_titles = rospy.get_param('~quartet_titles', '')
+    self.quartet_codes = rospy.get_param('~quartet_codes', '')
+
+
+    if self.pkg_name == '':
+      rospy.logerr('AMTHGames pkg_name not set; aborting')
+      return
+
+    if self.pkg_ap == '':
+      rospy.logerr('AMTHGames pkg_ap not set; aborting')
+      return
+
+    if self.quartet_titles == '':
+      rospy.logerr('[%s] quartet_titles not set; aborting', self.pkg_name)
+      return
+
+    if self.quartet_codes == '':
+      rospy.logerr('[%s] quartet_codes not set; aborting', self.pkg_name)
+      return
 
 
   ##############################################################################
@@ -197,11 +221,70 @@ class AMTHGames():
   ##############################################################################
   def let_the_games_begin(self, q):
 
-    rospy.loginfo('entered')
+    rospy.loginfo('[%s] Starting game %s', self.pkg_name, self.quartet_codes[q])
 
+    # Load params for this specific game
+    rospy.loginfo('[%s] Loading params', self.pkg_name)
+    self.load_game_params(self.quartet_codes[q])
+    rospy.loginfo('[%s] Done loading params', self.pkg_name)
+
+    # Play this specific game
     one_game = game.AMTHGame(self.root)
 
-    rospy.logerr('AFTER one_game')
+    rospy.logerr('[%s] Game %s over', self.pkg_name, self.quartet_codes[q])
+
+
+  ##############################################################################
+  def load_game_params(self, game_id):
+
+    # Load these variables
+    self.tl_variables = rospy.get_param('~tl_variables', '')
+
+    # Load the variables inside these .yaml files
+    self.tl_files = rospy.get_param('~tl_files', '')
+
+    # Load the variables inside these .yaml files
+    self.tl_dot_yaml = rospy.get_param('~tl_dot_yaml', '')
+
+    if self.tl_variables == '':
+      rospy.logerr('[%s] tl_variables not set; aborting', self.pkg_name)
+      return
+
+    if self.tl_files == '':
+      rospy.logerr('[%s] tl_files not set; aborting', self.pkg_name)
+      return
+
+    if self.tl_dot_yaml == '':
+      rospy.logerr('[%s] tl_dot_yaml not set; aborting', self.pkg_name)
+      return
+
+    ns = self.pkg_name + '_games/'
+
+
+    for i in range(len(self.tl_variables)):
+      rospy.set_param(\
+          ns + self.tl_variables[i][0], \
+          self.pkg_ap + self.tl_variables[i][1] + game_id)
+
+    for i in range(len(self.tl_dot_yaml)):
+      rospy.set_param(\
+          ns + self.tl_dot_yaml[i][0], \
+          self.pkg_ap + self.tl_dot_yaml[i][1] + game_id + '.yaml')
+
+    for i in range(len(self.tl_files)):
+      self.load_params_from_yaml(\
+          self.pkg_ap + self.tl_files[i] + game_id + '.yaml', ns)
+
+
+
+
+  ##############################################################################
+  def load_params_from_yaml(self, file_path, myns):
+
+    paramlist = \
+        rosparam.load_file(file_path,default_namespace=myns)
+    for params, ns in paramlist:
+      rosparam.upload_params(ns,params)
 
 
   ##############################################################################
