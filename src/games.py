@@ -282,9 +282,10 @@ class AMTHGames():
     # The first game is played (supposed to, anyway) from the pose of the first
     # game: the guide has already placed it there;
     # when the game is finished, if a new game is to be played (picking up
-    # from the last game (may not be the first), then the robot needs to move
+    # from the last game [may not be the first]), then the robot needs to move
     # on its own to that game's pose. The same applies if the last two games
-    # have the same code
+    # have the same code: the robot will not move if a game is shut down and
+    # brought back to life
     self.quartet_codes_played = []
 
     # Get a move_base action client
@@ -328,12 +329,12 @@ class AMTHGames():
         self.goto_goal_pose()
 
     # Play this specific game. Its questions, answers, etc have been uploaded
-    # and set
+    # and set. This function blocks.
     one_game = game.AMTHGame()
 
     rospy.logerr('[%s] Game %s over', self.pkg_name, self.quartet_codes[q])
 
-    # This game is over. Would you care to play another?
+    # This game is over. Would you care to play another one?
     self.choose_gameset_screen()
 
 

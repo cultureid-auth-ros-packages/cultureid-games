@@ -1391,7 +1391,8 @@ class AMTHGame():
 
       # Calculate duration FROM START TO FINISH
       if self.groups_clocks_start[group] != 0:
-        self.stats[2][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
+        self.stats[2][group] = \
+            (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
       else:
         self.stats[2][group] = 0
 
@@ -1401,6 +1402,7 @@ class AMTHGame():
     # This is necessary so that control is relinquished to class AMTHGames.
     # Who would have thought
     self.root.quit()
+    rospy.sleep(0.5)
     self.root.destroy()
 
     rospy.logerr('This game is over')
