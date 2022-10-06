@@ -539,28 +539,8 @@ class AMTHGame():
     # The text of the question
     q_text = self.Q[current_group][current_q]
 
-    # Split by space
-    q_text_split = q_text.split(" ")
-    max_line_length = 80
-    if display_image == True:
-      max_line_length = max_line_length / 2
-
-    lines = ['']
-    line_counter = 0
-    for i in range(len(q_text_split)):
-      test_line = lines[line_counter] + " " + q_text_split[i]
-      if len(test_line) <= max_line_length:
-        lines[line_counter] = test_line
-      else:
-        line_counter = line_counter + 1
-        lines.append('\n')
-        lines[line_counter] = lines[line_counter] + " " + q_text_split[i]
-
-
-    disp_qtext = ''
-    for i in range(len(lines)):
-      disp_qtext = disp_qtext + lines[i]
-
+    # Fit text into box
+    disp_qtext = self.fit_text(q_text, display_image, 80)
     buttonText.append(disp_qtext)
 
 
@@ -621,7 +601,11 @@ class AMTHGame():
 
     # Show A
     for answer_txt,num in zip(choices,range(len(choices))):
-      buttonText.append(answer_txt)
+
+      # Fit text into box
+      disp_qtext = self.fit_text(answer_txt, False, 40)
+      buttonText.append(disp_qtext)
+
       if isinstance(correct_a, int) or isinstance(correct_a, str):
         this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
       elif isinstance(correct_a, list):
@@ -930,6 +914,32 @@ class AMTHGame():
     q = pose_msg.pose.pose.orientation
     euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
     return euler[2]
+
+
+  ##############################################################################
+  def fit_text(self,in_text,display_image,width):
+
+    q_text_split = in_text.split(" ")
+    max_line_length = width
+    if display_image == True:
+      max_line_length = max_line_length / 2
+
+    lines = ['']
+    line_counter = 0
+    for i in range(len(q_text_split)):
+      test_line = lines[line_counter] + " " + q_text_split[i]
+      if len(test_line) <= max_line_length:
+        lines[line_counter] = test_line
+      else:
+        line_counter = line_counter + 1
+        lines.append('\n')
+        lines[line_counter] = lines[line_counter] + " " + q_text_split[i]
+
+    disp_qtext = ''
+    for i in range(len(lines)):
+      disp_qtext = disp_qtext + lines[i]
+
+    return disp_qtext
 
 
   ##############################################################################
