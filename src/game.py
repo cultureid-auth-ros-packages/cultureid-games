@@ -614,6 +614,9 @@ class AMTHGame():
     # ta koumpia tou para8urou apanthseis
     buttonVec = []
     buttonText = []
+
+    # All checkboxes must be checked off before execution...
+    # https://stackoverflow.com/questions/37595078/tkinter-is-there-a-way-to-check-checkboxes-by-default
     self.check_var = []
 
     # Show A
