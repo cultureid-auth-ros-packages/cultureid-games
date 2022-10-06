@@ -290,15 +290,16 @@ class AMTHGames():
 
     # Get a move_base action client
     self.action_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    rospy.loginfo('[%s] Connecting to move_base...', self.pkg_name)
-    self.action_client.wait_for_server()
+    rospy.loginfo('[%s] Waiting to connect to move_base...', self.pkg_name)
+    #self.action_client.wait_for_server()
+    rospy.loginfo('[%s] Connected to move_base.', self.pkg_name)
 
 
   ##############################################################################
   def kill_root(self):
+    rospy.logerr('[%s] A classic example of murder-suicide.', self.pkg_name)
     call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
     self.root.destroy()
-    rospy.logerr('[%s] Killing everything', self.pkg_name)
     os._exit(os.EX_OK)
 
 
@@ -411,7 +412,7 @@ class AMTHGames():
   def new_canvas(self):
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='white')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    #canvas.pack(fill=Tkinter.BOTH,expand=True)
     self.canvas_ = canvas
     return canvas
 

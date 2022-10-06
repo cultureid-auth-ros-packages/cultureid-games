@@ -1429,7 +1429,7 @@ class AMTHGame():
   def new_canvas(self):
     canvas = Tkinter.Canvas(self.root)
     canvas.configure(bg='white')
-    canvas.pack(fill=Tkinter.BOTH,expand=True)
+    #canvas.pack(fill=Tkinter.BOTH,expand=True)
     self.canvas_ = canvas
     return canvas
 
