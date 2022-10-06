@@ -58,6 +58,10 @@ class AMTHGame():
 
 
   ##############################################################################
+  def append_answer_to_list_of_answers(self, ans):
+    self.answers_list.append(ans)
+
+  ##############################################################################
   def ask_to_restore_game(self):
 
     # new canvas
@@ -353,10 +357,19 @@ class AMTHGame():
   def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader):
 
     if do_open_rfid_reader == False:
-      if answer_given == correct_a:
-        self.correct_answer()
-      else:
-        self.incorrect_answer()
+
+      if isinstance(answer_given, int):
+        if answer_given == correct_a:
+          self.correct_answer()
+        else:
+          self.incorrect_answer()
+
+      if isinstance(answer_given, list):
+        if set(answer_given) == set(correct_a):
+          self.correct_answer()
+        else:
+          self.incorrect_answer()
+
     else:
       if answer_given == -1:
         rospy.logwarn('OPENING RFID READER')
@@ -474,6 +487,10 @@ class AMTHGame():
     # The voice-over of the question
     current_vf = self.V[current_group][current_q]
 
+    # When a questions has multiple correct answers this list holds all
+    # checked answers
+    self.answers_list = []
+
     #print current_group
     #print current_q
     #print choices
@@ -510,7 +527,11 @@ class AMTHGame():
     if do_open_rfid_reader:
       QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
     else:
-      QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
+      if isinstance(correct_a, int) or isinstance(correct_a, str):
+        QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
+      elif isinstance(correct_a,list):
+        QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.check_answer_given, self.answers_list, correct_a, do_open_rfid_reader))
+
     buttonVec.append(QButton)
 
     # Make text of question fit into `max_line_length` characters
@@ -593,13 +614,17 @@ class AMTHGame():
     # ta koumpia tou para8urou apanthseis
     buttonVec = []
     buttonText = []
-
-
+    self.check_var = []
 
     # Show A
     for answer_txt,num in zip(choices,range(len(choices))):
       buttonText.append(answer_txt)
-      this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
+      if isinstance(correct_a, int) or isinstance(correct_a, str):
+        this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
+      elif isinstance(correct_a, list):
+        self.check_var.append(Tkinter.IntVar(value=0))
+        this_butt = Tkinter.Checkbutton(frame,text='???',selectcolor="black",fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',  variable=self.check_var[num], command=partial(self.append_answer_to_list_of_answers, num))
+
       buttonVec.append(this_butt)
 
     xNum,yNum = self.get_x_y_dims(len(buttonVec))
