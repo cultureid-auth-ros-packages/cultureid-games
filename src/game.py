@@ -540,8 +540,8 @@ class AMTHGame():
     q_text = self.Q[current_group][current_q]
 
     # Fit text into box
-    disp_qtext = self.fit_text(q_text, display_image, 80)
-    buttonText.append(disp_qtext)
+    #disp_qtext = self.fit_text(q_text, display_image, 80)
+    buttonText.append(q_text)
 
 
     if display_image == True:
@@ -583,6 +583,7 @@ class AMTHGame():
         thisHeight = buttonVec[counter].winfo_height()
 
         buttonVec[counter].config(font=("Helvetica", 16))
+        buttonVec[counter].config(wraplength=thisWidth-10,justify="center")
         buttonVec[counter].update()
 
         counter = counter+1
@@ -603,8 +604,8 @@ class AMTHGame():
     for answer_txt,num in zip(choices,range(len(choices))):
 
       # Fit text into box
-      disp_qtext = self.fit_text(answer_txt, False, 40)
-      buttonText.append(disp_qtext)
+      #disp_qtext = self.fit_text(answer_txt, False, 40)
+      buttonText.append(answer_txt)
 
       if isinstance(correct_a, int) or isinstance(correct_a, str):
         this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
@@ -652,6 +653,7 @@ class AMTHGame():
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
           buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].config(wraplength=thisWidth-10,justify="center")
           buttonVec[counter].update()
 
         counter = counter+1
@@ -788,7 +790,7 @@ class AMTHGame():
 
     count = []
     for i in range(0,len(self.Q)):
-      count.append( (correct[i]-incorrect[i]) / len(self.Q[i]) / (time[i]+0.01) )
+      count.append( (correct[i]-incorrect[i]) / len(self.Q[i]) / (0.1*time[i]+0.1) )
 
     max_v = max(count)
     gs = [i for i,j in enumerate(count) if j == max_v]
@@ -807,11 +809,11 @@ class AMTHGame():
     playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.kill_root)
     buttonVec.append(playButton)
 
-    txt = 'ΣΥΓΧΑΡΗΤΗΡΙΑ ΣΤΗΝ ΟΜΑΔΑ'
+    txt = 'ΣΥΓΧΑΡΗΤΗΡΙΑ'
     if (len(gs) == 1):
-      txt = txt + ' ' + str(gs[0]+1)
+      txt = txt + ' ΣΤΗΝ ΟΜΑΔΑ ' + str(gs[0]+1)
     else:
-      txt = txt + 's '
+      txt = txt + ' ΣΤΙΣ ΟΜΑΔΕΣ '
       for i in range(0,len(gs)-1):
         txt = txt + str(gs[i]+1) + ', '
 
