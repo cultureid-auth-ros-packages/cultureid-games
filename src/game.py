@@ -39,7 +39,7 @@ class AMTHGame():
 
     # Sets the pose estimate of amcl
     self.amcl_init_pose_pub = \
-        rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
+        rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10, latch=True)
 
     # Publishes raw velocity commands to the wheels of the base
     # [for celebrations]

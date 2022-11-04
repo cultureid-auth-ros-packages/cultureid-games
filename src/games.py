@@ -317,6 +317,10 @@ class AMTHGames():
     # Which game is this?
     self.quartet_codes_played.append(self.quartet_codes[q])
 
+    # The museum's map is huge and not everytime does the initial pose get
+    # loaded. Set it here. TODO
+
+
     # The parameters have been set, but we are at the end of game
     if len(self.quartet_codes_played) > 1 and \
         self.quartet_codes_played[-1] != self.quartet_codes_played[-2]:

@@ -124,6 +124,5 @@ V: [
 # RFID measurements file
 rfid_file: 'results_001625143965.txt'
 
-# Starting pose for game a
-start_pose: [3.30995346437, 21.4882351843, 0,0,0, -0.0745858650163, 0.99721459513]
-#start_pose: [10.4179109403, 4.9571560998, 0,0,0, 0.33038906878, 0.94384483006]
+# Starting pose for game b
+start_pose: [4.98766658505, 24.520899454, 0,0,0, -0.0797889896815, 0.996811776177]
