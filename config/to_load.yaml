@@ -11,7 +11,7 @@ tl_dot_yaml: [
   ['statefile', '/config/state_']
 ]
 
-# specific .yaml files---to be prefixed and sufixed at runtime
+# specific .yaml files---to be prefixed and suffixed at runtime
 tl_files: [
   '/config/params_',
   '/config/state_'

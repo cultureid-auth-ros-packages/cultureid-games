@@ -46,6 +46,10 @@ class AMTHGames():
     self.root = Tkinter.Tk()
     self.root.attributes('-fullscreen',True)
 
+    # Sets the pose estimate of amcl
+    self.amcl_init_pose_pub = \
+        rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10, latch=True)
+
     # Load params for this class
     self.init_params()
 
@@ -318,7 +322,17 @@ class AMTHGames():
     self.quartet_codes_played.append(self.quartet_codes[q])
 
     # The museum's map is huge and not everytime does the initial pose get
-    # loaded. Set it here. TODO
+    # loaded. Set it here.
+    if len(self.quartet_codes_played) == 1:
+
+      # Read start pose ...
+      current_pose = rospy.get_param('~start_pose', '')
+
+      # ... transform it into a message ...
+      pose_msg = self.make_pose_msg(current_pose)
+
+      # ... and publish it to /initialpose
+      self.amcl_init_pose_pub.publish(pose_msg)
 
 
     # The parameters have been set, but we are at the end of game
@@ -410,6 +424,23 @@ class AMTHGames():
     goal.target_pose.header.stamp = rospy.Time.now()
 
     return goal
+
+
+  ##############################################################################
+  def make_pose_msg(self, in_pose):
+
+    out_pose = PoseWithCovarianceStamped()
+    out_pose.pose.pose.position.x = in_pose[0]
+    out_pose.pose.pose.position.y = in_pose[1]
+    out_pose.pose.pose.position.z = in_pose[2]
+    out_pose.pose.pose.orientation.x = in_pose[3]
+    out_pose.pose.pose.orientation.y = in_pose[4]
+    out_pose.pose.pose.orientation.z = in_pose[5]
+    out_pose.pose.pose.orientation.w = in_pose[6]
+    out_pose.header.frame_id = 'map'
+    out_pose.header.stamp = rospy.Time.now()
+
+    return out_pose
 
 
   ##############################################################################

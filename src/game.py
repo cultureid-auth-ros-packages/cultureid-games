@@ -1352,7 +1352,10 @@ class AMTHGame():
 
     # Set pose; from normal configuration
     self.pose_ = self.make_pose_msg(self.start_pose)
-    self.set_amcl_init_pose_msg(self.pose_)
+
+    # All games start from game a. Due to the large map problem set the
+    # robot's pose to that of the start pose of game a
+    #self.set_amcl_init_pose_msg(self.pose_)
 
     # Check if the user wants to restore the last game if abruptly hung up
     if self.in_state != '' and self.in_stats != '':
