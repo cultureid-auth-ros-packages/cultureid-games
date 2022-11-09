@@ -276,21 +276,22 @@ class AMTHGame():
 
   ##############################################################################
   # Play end song
-  def celebrate(self):
+  def celebrate(self, game_over_flag):
     rospy.logwarn('watch me im twerking')
 
-    # This is synchronous
-    #call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/tiff_game_over_ohyeah.mp3'])
+     # Celebrate conditionally. If game over: move; if not, don't.
+    if game_over_flag:
+      pn = random.randint(0,6)
+      p = Popen(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/c' + str(pn) + '.mp3'])
 
-    # This is asynchronous
-    pn = random.randint(0,6)
-    p = Popen(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/c' + str(pn) + '.mp3'])
+      # Celebrate randomly
+      cn = random.randint(0,1)
+      self.celebration_motion(cn)
+      p.terminate()
+    else:
+      pn = random.randint(0,2)
+      call(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/cshort' + str(pn) + '.mp3'])
 
-    # Celebrate randomly
-    cn = random.randint(0,1)
-    self.celebration_motion(cn)
-
-    p.terminate()
     return
 
 
@@ -730,7 +731,7 @@ class AMTHGame():
         counter = counter+1
 
     # Celebrate mf
-    #self.celebrate()
+    self.celebrate()
 
 
   ##############################################################################

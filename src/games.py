@@ -50,6 +50,11 @@ class AMTHGames():
     self.amcl_init_pose_pub = \
         rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10, latch=True)
 
+    # Publishes raw velocity commands to the wheels of the base
+    # [for initial pose calibration]
+    self.raw_velocity_commands_pub = \
+        rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
+
     # Load params for this class
     self.init_params()
 
@@ -254,7 +259,15 @@ class AMTHGames():
 
     rospy.loginfo('[%s] Sending goal and waiting for result', self.pkg_name)
     self.action_client.send_goal(goal_msg)
+
+    # Play music while waiting for goal completion
+    p = Popen(['cvlc', '--repeat', self.navigation_audiofile])
+
+    # Wait for action completion
     self.action_client.wait_for_result()
+
+    # Terminate audio file once on target
+    p.terminate()
 
 
   ##############################################################################
@@ -264,6 +277,7 @@ class AMTHGames():
     self.pkg_ap = rospy.get_param('~pkg_ap', '')
     self.quartet_titles = rospy.get_param('~quartet_titles', '')
     self.quartet_codes = rospy.get_param('~quartet_codes', '')
+    self.navigation_audiofile = rospy.get_param('~navigation_audiofile', '')
 
 
     if self.pkg_name == '':
@@ -333,6 +347,11 @@ class AMTHGames():
 
       # ... and publish it to /initialpose
       self.amcl_init_pose_pub.publish(pose_msg)
+
+      rospy.sleep(1.0)
+
+      # Do various motions to align the pose estimate to the actual pose
+      self.move_to_calibrate_initialpose(2)
 
 
     # The parameters have been set, but we are at the end of game
@@ -441,6 +460,52 @@ class AMTHGames():
     out_pose.header.stamp = rospy.Time.now()
 
     return out_pose
+
+
+  ##############################################################################
+  def move_to_calibrate_initialpose(self, num_tries):
+
+    lf = Vector3(+0.1,0,0)
+    lb = Vector3(-0.1,0,0)
+    a = Vector3(0,0,0)
+    twist_msg_bf_p = Twist(lf,a)
+    twist_msg_bf_n = Twist(lb,a)
+
+    l = Vector3(0,0,0)
+    ap = Vector3(0,0,+1)
+    an = Vector3(0,0,-1)
+    twist_msg_ss_p = Twist(l,ap)
+    twist_msg_ss_n = Twist(l,an)
+
+    trn_nm = 8
+    rot_nm = 4
+
+    for i in range(num_tries):
+
+      # Forth ------------------------------------------------------------------
+      for i in range(trn_nm):
+        self.raw_velocity_commands_pub.publish(twist_msg_bf_p)
+        rospy.sleep(0.5)
+
+      # Counterclockwise -------------------------------------------------------
+      for i in range(rot_nm):
+        self.raw_velocity_commands_pub.publish(twist_msg_ss_n)
+        rospy.sleep(0.5)
+
+      # Clockwise --------------------------------------------------------------
+      for i in range(2*rot_nm):
+        self.raw_velocity_commands_pub.publish(twist_msg_ss_p)
+        rospy.sleep(0.5)
+
+      # Counterclockwise -------------------------------------------------------
+      for i in range(rot_nm):
+        self.raw_velocity_commands_pub.publish(twist_msg_ss_n)
+        rospy.sleep(0.5)
+
+      # Back -------------------------------------------------------------------
+      for i in range(trn_nm):
+        self.raw_velocity_commands_pub.publish(twist_msg_bf_n)
+        rospy.sleep(0.5)
 
 
   ##############################################################################

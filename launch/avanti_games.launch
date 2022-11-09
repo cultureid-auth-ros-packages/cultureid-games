@@ -9,10 +9,11 @@
 
   <node name="cultureid_games_N_games" pkg="cultureid_games_N" type="games.py" output="screen">
 
-    <param name="pkg_name"            value="$(arg pkg_name)" />
-    <param name="pkg_ap"              value="$(arg pkg_ap)" />
-    <rosparam command="load"          file="$(arg pkg_ap)/config/quarteta.yaml" />
-    <rosparam command="load"          file="$(arg pkg_ap)/config/to_load.yaml" />
+    <param name="pkg_name"              value="$(arg pkg_name)" />
+    <param name="pkg_ap"                value="$(arg pkg_ap)" />
+    <param name="navigation_audiofile"  value="$(arg pkg_ap)/gui_resources/navigation/p1_to_p2.mp3" />
+    <rosparam command="load"            file="$(arg pkg_ap)/config/quarteta.yaml" />
+    <rosparam command="load"            file="$(arg pkg_ap)/config/to_load.yaml" />
 
   </node>
 
