@@ -276,11 +276,14 @@ class AMTHGame():
 
   ##############################################################################
   # Play end song
-  def celebrate(self, game_over_flag):
+  def celebrate(self, game_notover_flag ):
     rospy.logwarn('watch me im twerking')
 
      # Celebrate conditionally. If game over: move; if not, don't.
-    if game_over_flag:
+    if game_notover_flag:
+      pn = random.randint(0,2)
+      call(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/cshort' + str(pn) + '.mp3'])
+    else:
       pn = random.randint(0,6)
       p = Popen(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/c' + str(pn) + '.mp3'])
 
@@ -288,9 +291,6 @@ class AMTHGame():
       cn = random.randint(0,1)
       self.celebration_motion(cn)
       p.terminate()
-    else:
-      pn = random.randint(0,2)
-      call(['cvlc', '--no-repeat','--play-and-exit', self.cel_media + '/cshort' + str(pn) + '.mp3'])
 
     return
 
@@ -688,7 +688,9 @@ class AMTHGame():
     buttonVec = []
     buttonText = []
 
-    if self.state[1][self.state[0]] < len(self.Q[self.state[0]]):
+    game_notover_flag = self.state[1][self.state[0]] < len(self.Q[self.state[0]])
+
+    if game_notover_flag:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]))
       buttonVec.append(playButton)
       buttonText.append('ΕΥΓΕ!')
@@ -731,7 +733,7 @@ class AMTHGame():
         counter = counter+1
 
     # Celebrate mf
-    self.celebrate()
+    self.celebrate(game_notover_flag )
 
 
   ##############################################################################
