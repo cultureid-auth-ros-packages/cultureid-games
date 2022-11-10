@@ -693,7 +693,7 @@ class AMTHGame():
     game_notover_flag = self.state[1][self.state[0]] < len(self.Q[self.state[0]])
 
     if game_notover_flag:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]), image=photo, compound=Tkinter.TOP)
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init, image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
       buttonText.append('ΕΥΓΕ!')
     else:
