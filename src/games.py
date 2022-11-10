@@ -278,6 +278,7 @@ class AMTHGames():
     self.quartet_titles = rospy.get_param('~quartet_titles', '')
     self.quartet_codes = rospy.get_param('~quartet_codes', '')
     self.navigation_audiofile = rospy.get_param('~navigation_audiofile', '')
+    self.navigation_imagefile = rospy.get_param('~navigation_imagefile', '')
 
 
     if self.pkg_name == '':
@@ -294,6 +295,14 @@ class AMTHGames():
 
     if self.quartet_codes == '':
       rospy.logerr('[%s] quartet_codes not set; aborting', self.pkg_name)
+      return
+
+    if self.navigation_audiofile == '':
+      rospy.logerr('[%s] navigation_audiofile not set; aborting', self.pkg_name)
+      return
+
+    if self.navigation_imagefile == '':
+      rospy.logerr('[%s] navigation_imagefile not set; aborting', self.pkg_name)
       return
 
     # Which games have been played. This is needed because:
@@ -388,6 +397,9 @@ class AMTHGames():
     # Load the variables inside these .yaml files
     self.tl_dot_yaml = rospy.get_param('~tl_dot_yaml', '')
 
+    # Load these variables
+    self.tl_common_files = rospy.get_param('~tl_common_files', '')
+
     if self.tl_variables == '':
       rospy.logerr('[%s] tl_variables not set; aborting', self.pkg_name)
       return
@@ -400,6 +412,9 @@ class AMTHGames():
       rospy.logerr('[%s] tl_dot_yaml not set; aborting', self.pkg_name)
       return
 
+    if self.tl_common_files == '':
+      rospy.logerr('[%s] tl_common_files not set; aborting', self.pkg_name)
+      return
 
     # Start loading params necessary for game game_id
     ns = self.pkg_name + '_games/'
@@ -417,6 +432,11 @@ class AMTHGames():
     for i in range(len(self.tl_files)):
       self.load_params_from_yaml(\
           self.pkg_ap + self.tl_files[i] + game_id + '.yaml', ns)
+
+    for i in range(len(self.tl_common_files)):
+      rospy.set_param(\
+          ns + self.tl_common_files[i][0], \
+          self.pkg_ap + self.tl_common_files[i][1])
 
 
   ##############################################################################

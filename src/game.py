@@ -688,14 +688,16 @@ class AMTHGame():
     buttonVec = []
     buttonText = []
 
+    photo = Tkinter.PhotoImage(master = self.canvas_, file = self.correct_answer_image)
+
     game_notover_flag = self.state[1][self.state[0]] < len(self.Q[self.state[0]])
 
     if game_notover_flag:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=partial(self.game, self.state[0]), image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
       buttonText.append('ΕΥΓΕ!')
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]))
+      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]), image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
       buttonText.append('Συγχαρητήρια!')
 
@@ -1177,8 +1179,10 @@ class AMTHGame():
     buttonVec = []
     buttonText = []
 
+    photo = Tkinter.PhotoImage(master = self.canvas_, file = self.incorrect_answer_image)
+
     buttonText.append('Κάνατε λάθος. Πατήστε για επιστροφή')
-    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]))
+    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]), image=photo, compound=Tkinter.TOP)
     buttonVec.append(playButton)
 
     xNum = 1
@@ -1286,6 +1290,10 @@ class AMTHGame():
     self.rfid_file = rospy.get_param('~rfid_file', '')
     self.statefile = rospy.get_param('~statefile', '')
     self.start_pose = rospy.get_param('~start_pose', '')
+    self.navigation_theme = rospy.get_param('~navigation_theme', '')
+    self.navigation_image = rospy.get_param('~navigation_image', '')
+    self.correct_answer_image = rospy.get_param('~correct_answer_image', '')
+    self.incorrect_answer_image = rospy.get_param('~incorrect_answer_image', '')
 
     # Read [Q]uestions, [C]hoices, correct [A]nswers, [I]mages
     self.Q = rospy.get_param('~Q', '')
@@ -1339,6 +1347,22 @@ class AMTHGame():
 
     if self.start_pose == '':
       rospy.logerr('[cultureid_games_N] start_pose not set; aborting')
+      return
+
+    if self.navigation_theme == '':
+      rospy.logerr('[cultureid_games_N] navigation_theme not set; aborting')
+      return
+
+    if self.navigation_image == '':
+      rospy.logerr('[cultureid_games_N] navigation_image not set; aborting')
+      return
+
+    if self.correct_answer_image == '':
+      rospy.logerr('[cultureid_games_N] correct_answer_image not set; aborting')
+      return
+
+    if self.incorrect_answer_image == '':
+      rospy.logerr('[cultureid_games_N] incorrect_answer_image not set; aborting')
       return
 
     if self.Q == '':

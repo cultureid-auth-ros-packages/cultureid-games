@@ -1,4 +1,4 @@
-# specific variables---to be prefixed and sufixed at runtime
+# specific variables---to be prefixed and suffixed at runtime
 tl_variables: [
   ['dir_media',           '/gui_resources/media_'],
   ['cel_media',           '/gui_resources/celebrations_media_'],
@@ -6,7 +6,7 @@ tl_variables: [
   ['rfid_java_exec_dir',  '/rfid_detection_resources/game_']
 ]
 
-# load specific variable to be prefixed, and suffixed with '.yaml'
+# load specific variable to be prefixed and suffixed with '.yaml'
 tl_dot_yaml: [
   ['statefile', '/config/state_']
 ]
@@ -15,4 +15,12 @@ tl_dot_yaml: [
 tl_files: [
   '/config/params_',
   '/config/state_'
+]
+
+# common directories with files
+tl_common_files: [
+  ['navigation_theme',        '/gui_resources/navigation/p1_to_p2.mp3'],
+  ['navigation_image',        '/gui_resources/navigation/danger_robot.png'],
+  ['correct_answer_image',    '/gui_resources/answers/correct.png'],
+  ['incorrect_answer_image',  '/gui_resources/answers/incorrect.png']
 ]
