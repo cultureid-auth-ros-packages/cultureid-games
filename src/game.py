@@ -6,6 +6,7 @@ import threading
 import os
 import numpy as np
 import time
+import copy
 from subprocess import call, Popen
 from functools import partial
 import random
@@ -374,6 +375,7 @@ class AMTHGame():
     else:
       if answer_given == -1:
         rospy.logwarn('OPENING RFID READER')
+        self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
         self.open_rfid_reader()
 
         rospy.sleep(1.0)
@@ -409,8 +411,6 @@ class AMTHGame():
 
       self.reset_file(self.rfid_java_exec_dir + '/' + self.rfid_file)
 
-      # Antodimi fix 20/09/2022 after tif 22
-      #if (proportion_of_measurements > 0.5) and (epc_most_measurements == correct_answer):
       if epc_most_measurements == correct_answer:
         return True
       else:
@@ -606,7 +606,14 @@ class AMTHGame():
 
       # Fit text into box
       #disp_qtext = self.fit_text(answer_txt, False, 40)
-      buttonText.append(answer_txt)
+
+      # If you find a `~` character in an answer this means that a rfid tag is
+      # required to be presented to the robot as an answer.
+      id_tilda = answer_txt.find('~')
+      if id_tilda == -1:
+        buttonText.append(answer_txt)
+      else:
+        buttonText.append(answer_txt[0:id_tilda])
 
       if isinstance(correct_a, int) or isinstance(correct_a, str):
         this_butt = Tkinter.Button(frame,text='???',fg='white',bg='#E0B548',activeforeground='white',activebackground='#E0B548',command=partial(self.check_answer_given, num, correct_a, do_open_rfid_reader))
@@ -1059,6 +1066,8 @@ class AMTHGame():
   ##############################################################################
   def get_epc_with_most_measurements(self, measurements):
 
+
+    # Calculate measurement occurencies for each unique epc / tag
     unique_epcs = []
     unique_epc_counter = []
 
@@ -1075,7 +1084,30 @@ class AMTHGame():
         indx = unique_epcs.index(m)
         unique_epc_counter[indx] = unique_epc_counter[indx] + 1
 
-    return unique_epcs[np.argmax(unique_epc_counter)], np.max(unique_epc_counter) / len(measurements)
+
+    # Group playing
+    current_group = self.state[0]
+
+    # The current unanswered question for this group
+    current_q = self.state[1][current_group]
+
+    # All the choices for this question
+    choices = copy.copy(self.C[current_group][current_q])
+
+    # Get available answers in epc form for the current question
+    unique_epcs_limited = {}
+    for c in range(len(choices)):
+      id_tilda = choices[c].find('~')
+      choices[c] = choices[c][id_tilda+1:]
+
+    # `unique_epcs_limited` holds only, and at most, the available answers in
+    # epc form and their occurence count in the measurements file
+    unique_epcs_limited = {}
+    for u in range(len(unique_epcs)):
+      if unique_epcs[u] in choices:
+        unique_epcs_limited[unique_epcs[u]] = unique_epc_counter[u]
+
+    return max(unique_epcs_limited, key=unique_epcs_limited.get), np.max(unique_epcs_limited.values()) / len(measurements)
 
 
   ##############################################################################
