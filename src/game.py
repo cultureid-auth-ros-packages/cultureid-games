@@ -183,7 +183,7 @@ class AMTHGame():
 
     QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40')
     buttonVec.append(QButton)
-    buttonText.append('Επιθυμείτε να τερματίσετε το παρόν \nπαιχνίδι για το group ' + str(group+1) + '?')
+    buttonText.append('Επιθυμείτε να τερματίσετε το παρόν \nπαιχνίδι για την ομάδα ' + str(group+1) + '?')
 
     xNum = 1
     yNum = len(buttonVec)
@@ -677,6 +677,9 @@ class AMTHGame():
     # Increment correct answers counter for this group
     self.stats[0][self.state[0]] = self.stats[0][self.state[0]] + 1
 
+    # Calculate points
+    self.stats[2][self.state[0]] += 4
+
     # Save state to file
     self.save_state_to_file()
 
@@ -695,11 +698,14 @@ class AMTHGame():
     if game_notover_flag:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init, image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
-      buttonText.append('ΕΥΓΕ!')
+
+      show_str = 'ΕΥΓΕ! Έχετε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
+      buttonText.append(show_str)
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]), image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
-      buttonText.append('Συγχαρητήρια!')
+      show_str = 'ΣΥΓΧΑΡΗΤΉΡΙΑ! Συγκεντρώσατε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
+      buttonText.append(show_str)
 
     xNum = 1
     yNum = len(buttonVec)
@@ -789,18 +795,9 @@ class AMTHGame():
   ##############################################################################
   def display_winner(self, stats):
 
-    correct = stats[0]
-    incorrect = stats[1]
-    time = stats[2]
-
-    count = []
-    for i in range(0,len(self.Q)):
-      count.append( (correct[i]-incorrect[i]) / len(self.Q[i]) / (0.1*time[i]+0.1) )
-
-    max_v = max(count)
-    gs = [i for i,j in enumerate(count) if j == max_v]
-
-
+    # Locate index of max points
+    max_v = max(self.stats[2])
+    gs = [i for i,j in enumerate(self.stats[2]) if j == max_v]
 
     # to frame panw sto opoio 8a einai ta koumpia
     frame = self.new_frame()
@@ -824,6 +821,8 @@ class AMTHGame():
 
       txt = txt + str(gs[len(gs)-1]+1)
 
+
+    txt += ' \nΣυνολικός χρόνος τάξης: %d δευτερόλεπτα' % int(sum(self.stats[3]))
 
     buttonText.append(txt)
 
@@ -978,7 +977,7 @@ class AMTHGame():
     self.groups_clocks_stop[group] = rospy.Time.now()
 
     # Calculate duration FROM START TO FINISH
-    self.stats[2][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
+    self.stats[3][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
 
     # Check if game_over was issued due to skip or natural causes
     # TODO
@@ -1006,13 +1005,13 @@ class AMTHGame():
       #playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, next_group))
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.select_group_init)
       buttonVec.append(playButton)
-      buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]))
+      buttonText.append('GAME OVER ΓΙΑ ΤΗΝ ΟΜΑΔΑ ' + str(group+1) + '\n\n\nΣωστές απαντήσεις: ' + str(self.stats[0][group]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][group]) + '\nΠόντοι: ' + str(self.stats[2][group]))
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.display_winner, self.stats))
       buttonVec.append(playButton)
       txt = 'GAME OVER ΔΙΑ ΠΑΝΤΟΣ\n\n\n'
       for i in range(0,len(self.state[1])):
-        txt = txt + 'ΟΜΑΔΑ ' + str(i+1) + ':\nΣωστές απαντήσεις: ' + str(self.stats[0][i]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][i]) + '\nΧρόνος παιχνιδιού: ' + str(self.stats[2][i])[0:4] +  ' δευτερόλεπτα\n\n\n'
+        txt = txt + 'ΟΜΑΔΑ ' + str(i+1) + ':\nΣωστές απαντήσεις: ' + str(self.stats[0][i]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][i]) + '\nΠόντοι: ' + str(self.stats[2][i])+  ' \n\n\n'
       buttonText.append(txt)
 
     xNum = 1
@@ -1168,6 +1167,9 @@ class AMTHGame():
     # Increment incorrect answers counter for this group
     self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
 
+    # Calculate points
+    self.stats[2][self.state[0]] -= 1
+
     # Save state to file
     self.save_state_to_file()
 
@@ -1181,7 +1183,9 @@ class AMTHGame():
 
     photo = Tkinter.PhotoImage(master = self.canvas_, file = self.incorrect_answer_image)
 
-    buttonText.append('Κάνατε λάθος. Πατήστε για επιστροφή')
+    show_str = 'Κάνατε λάθος. Έχετε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
+    buttonText.append(show_str)
+
     playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]), image=photo, compound=Tkinter.TOP)
     buttonVec.append(playButton)
 
@@ -1461,10 +1465,10 @@ class AMTHGame():
 
       # Calculate duration FROM START TO FINISH
       if self.groups_clocks_start[group] != 0:
-        self.stats[2][group] = \
+        self.stats[3][group] = \
             (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
       else:
-        self.stats[2][group] = 0
+        self.stats[3][group] = 0
 
     self.save_state_to_file()
     #call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
@@ -1545,6 +1549,9 @@ class AMTHGame():
     # This many incorrect answers (skipped = incorrect)
     self.stats[1][group] += tq-ac
 
+    # This many points
+    self.stats[2][group] = 4*ac-self.stats[1][group]
+
     # Game over my friend
     self.game_over(group)
 
@@ -1601,10 +1608,11 @@ class AMTHGame():
     self.state[1] = [0] * len(self.Q)
 
     # Correct answers [0], incorrect answers [1] and game duration [2] per group
-    self.stats = [[],[],[]]
+    self.stats = [[],[],[],[]]
     self.stats[0] = [0] * len(self.Q)
     self.stats[1] = [0] * len(self.Q)
     self.stats[2] = [0] * len(self.Q)
+    self.stats[3] = [0] * len(self.Q)
 
     self.groups_clocks_start = [0] * len(self.Q)
     self.groups_clocks_stop = [0] * len(self.Q)
