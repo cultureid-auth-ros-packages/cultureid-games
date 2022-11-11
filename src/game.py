@@ -503,7 +503,7 @@ class AMTHGame():
     if current_i != '':
       display_image = True
       img = Tkinter.PhotoImage(\
-          file=self.dir_media+'/'+ str(current_group) + str(current_q) + '.png',master=self.canvas_)
+          file=self.dir_media+'/'+ self.I[current_group][current_q],master=self.canvas_)
       cuid = Tkinter.Label(frame,image=img)
       cuid.image = img
 
@@ -662,7 +662,7 @@ class AMTHGame():
     # Play question in audio form if audio file is supposed to exist
     if current_vf != '':
       if self.V_played[current_group][current_q] == False:
-        call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(current_group) + str(current_q) + '.mp3'])
+        call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(self.V[current_group][current_q])])
         self.V_played[current_group][current_q] = True
 
 
