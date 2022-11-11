@@ -23,6 +23,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseFeedback, M
 
 from std_msgs.msg import Empty
 from std_srvs.srv import Empty as srv_empty
+from std_srvs.srv import EmptyRequest as srv_empty_req
 from std_msgs.msg import Int8
 from nav_msgs.msg import Path
 from geometry_msgs.msg import Pose, PoseStamped, PoseWithCovarianceStamped
@@ -246,13 +247,21 @@ class AMTHGames():
     # Construct goal msg
     goal_msg = self.make_goal_msg(self.goal_pose)
 
-    cc_sleep_time = 3.0
+    cc_sleep_time = 5.0
 
     # Clear and come with me
     self.display_message('ΠΑΡΑΚΑΛΩ ΑΠΟΜΑΚΡΥΝΘΕΙΤΕ')
     rospy.loginfo('Waiting for %f sec before I clear costmaps', cc_sleep_time)
     rospy.sleep(cc_sleep_time)
     rospy.wait_for_service('/move_base/clear_costmaps')
+
+    try:
+      cc_srv = rospy.ServiceProxy('/move_base/clear_costmaps', srv_empty)
+      cc_srv(srv_empty_req())
+    except rospy.ServiceException as e:
+      rospy.logerr('[%s] Service call failed: %s', self.pkg_name, e)
+
+
     rospy.loginfo('Waiting for %f sec after I clear costmaps', cc_sleep_time)
     rospy.sleep(cc_sleep_time)
     self.display_message('ΠΑΡΑΚΑΛΩ ΕΛΑΤΕ ΜΑΖΙ ΜΟΥ')
