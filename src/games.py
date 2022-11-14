@@ -251,6 +251,7 @@ class AMTHGames():
 
     # Clear and come with me
     self.display_message('ΠΑΡΑΚΑΛΩ ΑΠΟΜΑΚΡΥΝΘΕΙΤΕ')
+    call(['cvlc', '--no-repeat', '--play-and-exit', self.navigation_warnfile])
     rospy.loginfo('Waiting for %f sec before I clear costmaps', cc_sleep_time)
     rospy.sleep(cc_sleep_time)
     rospy.wait_for_service('/move_base/clear_costmaps')
@@ -286,6 +287,7 @@ class AMTHGames():
     self.pkg_ap = rospy.get_param('~pkg_ap', '')
     self.quartet_titles = rospy.get_param('~quartet_titles', '')
     self.quartet_codes = rospy.get_param('~quartet_codes', '')
+    self.navigation_warnfile = rospy.get_param('~navigation_warnfile', '')
     self.navigation_audiofile = rospy.get_param('~navigation_audiofile', '')
     self.navigation_imagefile = rospy.get_param('~navigation_imagefile', '')
 
@@ -304,6 +306,10 @@ class AMTHGames():
 
     if self.quartet_codes == '':
       rospy.logerr('[%s] quartet_codes not set; aborting', self.pkg_name)
+      return
+
+    if self.navigation_warnfile == '':
+      rospy.logerr('[%s] navigation_warnfile not set; aborting', self.pkg_name)
       return
 
     if self.navigation_audiofile == '':
