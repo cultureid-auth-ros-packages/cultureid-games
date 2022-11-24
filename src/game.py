@@ -1321,13 +1321,10 @@ class AMTHGame():
     # Read params
     self.dir_media = rospy.get_param('~dir_media', '')
     self.cel_media = rospy.get_param('~cel_media', '')
-    self.dir_scripts = rospy.get_param('~dir_scripts', '')
     self.rfid_java_exec_dir = rospy.get_param('~rfid_java_exec_dir', '')
     self.rfid_file = rospy.get_param('~rfid_file', '')
     self.statefile = rospy.get_param('~statefile', '')
     self.start_pose = rospy.get_param('~start_pose', '')
-    self.navigation_theme = rospy.get_param('~navigation_theme', '')
-    self.navigation_image = rospy.get_param('~navigation_image', '')
     self.correct_answer_image = rospy.get_param('~correct_answer_image', '')
     self.incorrect_answer_image = rospy.get_param('~incorrect_answer_image', '')
 
@@ -1363,10 +1360,6 @@ class AMTHGame():
       rospy.logerr('[cultureid_games_N] cel_media not set; aborting')
       return
 
-    if self.dir_scripts == '':
-      rospy.logerr('[cultureid_games_N] dir_scripts not set; aborting')
-      return
-
     if self.rfid_file == '':
       rospy.logerr('[cultureid_games_N] rfid_file not set; aborting')
       return
@@ -1383,14 +1376,6 @@ class AMTHGame():
 
     if self.start_pose == '':
       rospy.logerr('[cultureid_games_N] start_pose not set; aborting')
-      return
-
-    if self.navigation_theme == '':
-      rospy.logerr('[cultureid_games_N] navigation_theme not set; aborting')
-      return
-
-    if self.navigation_image == '':
-      rospy.logerr('[cultureid_games_N] navigation_image not set; aborting')
       return
 
     if self.correct_answer_image == '':
