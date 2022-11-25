@@ -514,7 +514,9 @@ class AMTHGame():
 
 
 
-    # Show Q
+    # --------------------------------------------------------------------------
+    # Show Q -------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     buttonVec = []
     buttonText = []
 
@@ -601,7 +603,9 @@ class AMTHGame():
     # https://stackoverflow.com/questions/37595078/tkinter-is-there-a-way-to-check-checkboxes-by-default
     self.check_var = []
 
-    # Show A
+    # --------------------------------------------------------------------------
+    # Show A -------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     for answer_txt,num in zip(choices,range(len(choices))):
 
       # Fit text into box
@@ -672,6 +676,61 @@ class AMTHGame():
         call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(self.V[current_group][current_q])])
         self.V_played[current_group][current_q] = True
 
+    # --------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
+    # Display enter button
+    buttonVec = []
+    buttonText = []
+
+    o_flag = False
+
+    if do_open_rfid_reader:
+      o_flag = True
+      QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green', command=partial(self.check_answer_given, -1, correct_a, do_open_rfid_reader))
+    else:
+      if isinstance(correct_a,list):
+        o_flag = True
+        QButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='green',command=partial(self.check_answer_given, self.answers_list, correct_a, do_open_rfid_reader))
+
+    if o_flag == True:
+      buttonVec.append(QButton)
+      this_group_name = 'O'
+      buttonText.append(this_group_name)
+
+      xNum = 1
+      yNum = 1
+
+      xEff = 0.075
+      yEff = 0.075
+
+      GP = 0.175
+
+      xWithGuard = xEff/xNum
+      xG = GP*xWithGuard
+      xB = xWithGuard-xG
+
+      yWithGuard = yEff/yNum
+      yG = GP*yWithGuard
+      yB = yWithGuard-yG
+
+      counter = len(buttonVec)-1
+      for xx in range(xNum):
+        for yy in range(yNum):
+
+          if counter < len(buttonVec):
+            thisX = xG/2+xx*xWithGuard+1-2*xEff
+            thisY = yG/2+yy*yWithGuard
+
+            buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+            buttonVec[counter].config(text=buttonText[counter])
+            buttonVec[counter].update()
+
+            thisWidth = buttonVec[counter].winfo_width()
+            thisHeight = buttonVec[counter].winfo_height()
+            buttonVec[counter].config(font=("Helvetica", 20))
+            buttonVec[counter].update()
+
+          counter = counter+1
 
 
   ##############################################################################
@@ -1107,7 +1166,11 @@ class AMTHGame():
       if unique_epcs[u] in choices:
         unique_epcs_limited[unique_epcs[u]] = unique_epc_counter[u]
 
-    return max(unique_epcs_limited, key=unique_epcs_limited.get), np.max(unique_epcs_limited.values()) / len(measurements)
+
+    if len(unique_epcs_limited) > 0:
+      return max(unique_epcs_limited, key=unique_epcs_limited.get), np.max(unique_epcs_limited.values()) / len(measurements)
+    else:
+      return 'NONE', 0
 
 
   ##############################################################################
