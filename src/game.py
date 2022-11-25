@@ -685,7 +685,7 @@ class AMTHGame():
     self.stats[0][self.state[0]] = self.stats[0][self.state[0]] + 1
 
     # Calculate points
-    self.stats[2][self.state[0]] += 4
+    self.stats[2][self.state[0]] += self.point_pl
 
     # Save state to file
     self.save_state_to_file()
@@ -1151,7 +1151,7 @@ class AMTHGame():
         this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video_play_button,i))
 
       buttonVec.append(this_butt)
-      this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
+      this_group_name = 'ΟΜΑΔΑ %d (%d)' % ((i+1), self.stats[2][i])
       buttonText.append(this_group_name)
 
     xNum = len(buttonVec)
@@ -1200,7 +1200,7 @@ class AMTHGame():
     self.stats[1][self.state[0]] = self.stats[1][self.state[0]] + 1
 
     # Calculate points
-    self.stats[2][self.state[0]] -= 1
+    self.stats[2][self.state[0]] -= self.point_mn
 
     # Save state to file
     self.save_state_to_file()
@@ -1420,6 +1420,10 @@ class AMTHGame():
     self.groups_clocks_start = [0] * len(self.Q)
     self.groups_clocks_stop = [0] * len(self.Q)
 
+    # Weights for correct/incorrect answers
+    self.point_pl = 4
+    self.point_mn = 1
+
 
 
 
@@ -1566,8 +1570,8 @@ class AMTHGame():
     # This many incorrect answers (skipped = incorrect)
     self.stats[1][group] += tq-ac
 
-    # This many points
-    self.stats[2][group] = 4*ac-self.stats[1][group]
+    # These many points
+    self.stats[2][group] = self.point_pl*ac-self.point_mn*self.stats[1][group]
 
     # Game over my friend
     self.game_over(group)
@@ -1628,7 +1632,7 @@ class AMTHGame():
     self.stats = [[],[],[],[]]
     self.stats[0] = [0] * len(self.Q)
     self.stats[1] = [0] * len(self.Q)
-    self.stats[2] = [0] * len(self.Q)
+    self.stats[2] = [10] * len(self.Q)
     self.stats[3] = [0] * len(self.Q)
 
     self.groups_clocks_start = [0] * len(self.Q)
@@ -1655,7 +1659,7 @@ class AMTHGame():
     for i in range(0,len(self.Q)):
       this_butt = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.show_intro_video_play_button,i))
       buttonVec.append(this_butt)
-      this_group_name = 'ΟΜΑΔΑ %d' %(i+1)
+      this_group_name = 'ΟΜΑΔΑ %d\n%d πόντοι' % ((i+1), self.stats[2][i])
       buttonText.append(this_group_name)
 
 
