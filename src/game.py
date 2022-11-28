@@ -676,6 +676,7 @@ class AMTHGame():
         call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/' + str(self.V[current_group][current_q])])
         self.V_played[current_group][current_q] = True
 
+    """
     # --------------------------------------------------------------------------
     # --------------------------------------------------------------------------
     # Display enter button
@@ -731,7 +732,7 @@ class AMTHGame():
             buttonVec[counter].update()
 
           counter = counter+1
-
+  """
 
   ##############################################################################
   def correct_answer(self):
@@ -947,7 +948,7 @@ class AMTHGame():
     yNum = 1
 
     xEff = 0.075
-    yEff = 0.075
+    yEff = 0.1
 
     GP = 0.175
 
@@ -1220,10 +1221,10 @@ class AMTHGame():
     xNum = len(buttonVec)
     yNum = 1
 
-    xEff = 0.70
+    xEff = 0.85
     yEff = 0.1
 
-    GP = 0.2
+    GP = 0.1
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
@@ -1247,7 +1248,7 @@ class AMTHGame():
 
           thisWidth = buttonVec[counter].winfo_width()
           thisHeight = buttonVec[counter].winfo_height()
-          buttonVec[counter].config(font=("Helvetica", 20))
+          buttonVec[counter].config(font=("Helvetica", 16))
           buttonVec[counter].update()
 
         counter = counter+1
