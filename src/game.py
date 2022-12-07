@@ -442,7 +442,8 @@ class AMTHGame():
     # Compile self.stats
     stats_string = 'stats: ['
 
-    for i in range(len(self.stats)):
+    # For correct, incorrect, and points
+    for i in range(len(self.stats)-1):
       stats_string = stats_string + "["
       for j in range(len(self.stats[i])):
         stats_string = stats_string + str(self.stats[i][j])
@@ -453,7 +454,7 @@ class AMTHGame():
       if i != len(self.stats)-1:
         stats_string = stats_string + ","
 
-    stats_string = stats_string + "]"
+    stats_string = stats_string + str(self.stats[len(self.stats)-1]) + "]"
 
     # Compile self.pose_
     pose_string = 'pose: ['
@@ -889,7 +890,7 @@ class AMTHGame():
       txt = txt + str(gs[len(gs)-1]+1)
 
 
-    txt += ' \nΣυνολικός χρόνος τάξης: %d δευτερόλεπτα' % int(sum(self.stats[3]))
+    txt += ' \nΣυνολικός χρόνος τάξης: %d δευτερόλεπτα' % int(self.stats[3])
 
     buttonText.append(txt)
 
@@ -934,6 +935,9 @@ class AMTHGame():
   ##############################################################################
   # exit button
   def exit_button(self,frame):
+
+    self.groups_clock_stop = rospy.Time.now()
+    self.stats[3] = (self.groups_clock_stop-self.groups_clock_start).to_sec()
 
     buttonVec = []
     buttonText = []
@@ -1040,15 +1044,6 @@ class AMTHGame():
   ##############################################################################
   def game_over(self, group):
 
-    # Stop the clock for the current group
-    self.groups_clocks_stop[group] = rospy.Time.now()
-
-    # Calculate duration FROM START TO FINISH
-    self.stats[3][group] = (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
-
-    # Check if game_over was issued due to skip or natural causes
-    # TODO
-
     # Save state to file
     self.save_state_to_file()
 
@@ -1080,6 +1075,9 @@ class AMTHGame():
       for i in range(0,len(self.state[1])):
         txt = txt + 'ΟΜΑΔΑ ' + str(i+1) + ':\nΣωστές απαντήσεις: ' + str(self.stats[0][i]) + '\nΛανθασμένες απαντήσεις: ' + str(self.stats[1][i]) + '\nΠόντοι: ' + str(self.stats[2][i])+  ' \n\n\n'
       buttonText.append(txt)
+
+      self.groups_clock_stop = rospy.Time.now()
+      self.stats[3] = (self.groups_clock_stop-self.groups_clock_start).to_sec()
 
     xNum = 1
     yNum = len(buttonVec)
@@ -1481,14 +1479,12 @@ class AMTHGame():
 
     # For measuring group times
     self.previous_group = -1
-    self.groups_clocks_start = [0] * len(self.Q)
-    self.groups_clocks_stop = [0] * len(self.Q)
+    self.groups_clock_start = rospy.Time.now()
+    self.groups_clock_stop = rospy.Time.now()
 
     # Weights for correct/incorrect answers
     self.point_pl = 4
     self.point_mn = 1
-
-
 
 
   ##############################################################################
@@ -1543,17 +1539,6 @@ class AMTHGame():
 
   ##############################################################################
   def kill_root(self):
-
-    # Stop the clock for all groups
-    for group in range(len(self.Q)):
-      self.groups_clocks_stop[group] = rospy.Time.now()
-
-      # Calculate duration FROM START TO FINISH
-      if self.groups_clocks_start[group] != 0:
-        self.stats[3][group] = \
-            (self.groups_clocks_stop[group]-self.groups_clocks_start[group]).to_sec()
-      else:
-        self.stats[3][group] = 0
 
     self.save_state_to_file()
     #call(['bash', '/home/cultureid_user0/game_desktop_launchers/kill_all.sh'])
@@ -1692,15 +1677,17 @@ class AMTHGame():
     self.state = [0,[]]
     self.state[1] = [0] * len(self.Q)
 
-    # Correct answers [0], incorrect answers [1] and game duration [2] per group
+    # Correct answers [0], incorrect answers [1], points [2] and
+    # game duration [3] per group
+
     self.stats = [[],[],[],[]]
     self.stats[0] = [0] * len(self.Q)
     self.stats[1] = [0] * len(self.Q)
     self.stats[2] = [10] * len(self.Q)
-    self.stats[3] = [0] * len(self.Q)
+    self.stats[3] = 0
 
-    self.groups_clocks_start = [0] * len(self.Q)
-    self.groups_clocks_stop = [0] * len(self.Q)
+    self.groups_clock_start = rospy.Time.now()
+    self.groups_clock_stop = rospy.Time.now()
 
 
   ##############################################################################
@@ -1825,11 +1812,6 @@ class AMTHGame():
 
   ##############################################################################
   def show_intro_video_play_button(self, group):
-
-    # Start and stop clocks:
-    # stop the clock for the previous group (if one existed), and
-    # start the clock for the current group
-    self.groups_clocks_start[group] = rospy.Time.now()
 
     self.previous_group = group
 
