@@ -93,8 +93,7 @@ rfid_file: 'results_001625143965.txt'
 
 # Starting pose for game a
 # amth_games
-start_pose: [8.35, 35.5, 0,0,0, 0.9955, 0.0946]
-#start_pose: [10.4758667738, 34.9752528641, 0,0,0, 0.994354572594, 0.106108359528] # old pose (clogs corridor)
+start_pose: [8.30, 32.5, 0,0,0, 0.642, 0.77]
 
 # amth_offices_wunknown for testing (museum is crowded)
 #start_pose: [11.7774129583, 14.1673720608, 0, 0, 0, -0.951217617272, 0.30852073608]
