@@ -367,7 +367,32 @@ class AMTHGame():
           self.incorrect_answer()
 
       if isinstance(answer_given, list):
-        if set(answer_given) == set(correct_a):
+
+        answer_given_set = set(answer_given)
+
+        # Counts occurences of elements in `answer_given_set`
+        counts = [0]*len(answer_given_set)
+        i = 0
+
+        for ag in answer_given_set:
+          for j in range(len(answer_given)):
+            if ag == answer_given[j]:
+              counts[i] += 1
+          i += 1
+
+
+        # One might select a false answer, and then deselect it. The incorrect
+        # answer must be removed from the answers' list
+        i = 0
+        to_be_set = set()
+        for ag in answer_given_set:
+          if counts[i] % 2 == 1:
+            to_be_set.add(ag)
+          i += 1
+
+        self.answers_list = list(to_be_set)
+
+        if to_be_set == set(correct_a):
           self.correct_answer()
         else:
           self.incorrect_answer()
