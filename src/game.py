@@ -797,7 +797,7 @@ class AMTHGame():
     else:
       playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]), image=photo, compound=Tkinter.TOP)
       buttonVec.append(playButton)
-      show_str = 'ΣΥΓΧΑΡΗΤΉΡΙΑ! Συγκεντρώσατε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
+      show_str = 'ΣΥΓΧΑΡΗΤΗΡΙΑ! Συγκεντρώσατε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
       buttonText.append(show_str)
 
     xNum = 1
@@ -961,8 +961,6 @@ class AMTHGame():
   # exit button
   def exit_button(self,frame):
 
-    self.groups_clock_stop = rospy.Time.now()
-    self.stats[3] = (self.groups_clock_stop-self.groups_clock_start).to_sec()
 
     buttonVec = []
     buttonText = []
@@ -1659,6 +1657,8 @@ class AMTHGame():
       # Set pose; from saved file
       self.pose_ = self.make_pose_msg(self.in_pose)
 
+      self.groups_clock_start -= rospy.Duration.from_sec(self.in_stats[3])
+
     if c == 1:
       self.reset_state()
 
@@ -1711,12 +1711,13 @@ class AMTHGame():
     self.stats[2] = [10] * len(self.Q)
     self.stats[3] = 0
 
-    self.groups_clock_start = rospy.Time.now()
-    self.groups_clock_stop = rospy.Time.now()
-
 
   ##############################################################################
   def save_state_to_file(self):
+
+    self.groups_clock_stop = rospy.Time.now()
+    self.stats[3] = (self.groups_clock_stop-self.groups_clock_start).to_sec()
+
     self.write_file(self.compile_statestring(), self.statefile)
 
 
