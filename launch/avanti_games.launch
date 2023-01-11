@@ -14,6 +14,7 @@
     <param name="navigation_warnfile"   value="$(arg pkg_ap)/gui_resources/navigation/move_bitch.mp3" />
     <param name="navigation_audiofile"  value="$(arg pkg_ap)/gui_resources/navigation/p1_to_p2.mp3" />
     <param name="navigation_imagefile"  value="$(arg pkg_ap)/gui_resources/navigation/danger.png" />
+    <param name="rules_dir"             value="$(arg pkg_ap)/gui_resources/rules" />
     <rosparam command="load"            file="$(arg pkg_ap)/config/quarteta.yaml" />
     <rosparam command="load"            file="$(arg pkg_ap)/config/to_load.yaml" />
 

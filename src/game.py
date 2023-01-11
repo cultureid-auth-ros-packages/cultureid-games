@@ -1405,6 +1405,7 @@ class AMTHGame():
 
     # Read params
     self.dir_media = rospy.get_param('~dir_media', '')
+    self.rules_dir = rospy.get_param('~rules_dir', '')
     self.cel_media = rospy.get_param('~cel_media', '')
     self.rfid_java_exec_dir = rospy.get_param('~rfid_java_exec_dir', '')
     self.rfid_file = rospy.get_param('~rfid_file', '')
@@ -1784,10 +1785,41 @@ class AMTHGame():
     xEff = 1.0
     yEff = 0.3
 
-    GP = 0.05
+    GP = 0.1
 
-    xNum = xNum+1
+    xNum = 2
     yNum = yNum+1
+    xx = 0
+
+    xWithGuard = xEff/xNum
+    xG = GP*xWithGuard
+    xB = xWithGuard-xG
+
+    yWithGuard = yEff/yNum
+    yG = GP*yWithGuard
+    yB = yWithGuard-yG
+
+    thisX = xG/2+xx*xWithGuard+1-xEff
+    thisY = yG/2+yy*yWithGuard+1-yEff+GP
+
+    buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+    buttonVec[counter].config(text=buttonText[counter])
+    buttonVec[counter].update()
+
+    thisWidth = buttonVec[counter].winfo_width()
+    thisHeight = buttonVec[counter].winfo_height()
+    buttonVec[counter].config(font=("Helvetica", 30))
+    buttonVec[counter].update()
+
+
+
+    # HELP button --------------------------------------------------------------
+    help_button = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=self.show_help)
+    buttonVec.append(help_button)
+    buttonText.append('ΚΑΝΟΝΕΣ')
+
+    xx = xx + 1
+    counter = counter + 1
 
     xWithGuard = xEff/xNum
     xG = GP*xWithGuard
@@ -1824,6 +1856,14 @@ class AMTHGame():
   ##############################################################################
   def set_frame(self, frame):
     self.frame_ = frame
+
+
+  ##############################################################################
+  # show rules
+  def show_help(self):
+
+    call(['vlc', '--no-repeat','--fullscreen','--play-and-exit', \
+        self.rules_dir + '/rules.mp4'])
 
 
   ##############################################################################
