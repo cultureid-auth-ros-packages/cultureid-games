@@ -357,7 +357,6 @@ class AMTHGame():
 
   ##############################################################################
   def check_answer_given(self, answer_given, correct_a, do_open_rfid_reader):
-    rospy.loginfo('CHECKING ANSWER')
 
     if do_open_rfid_reader == False:
 

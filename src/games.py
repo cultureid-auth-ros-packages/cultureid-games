@@ -375,7 +375,7 @@ class AMTHGames():
       rospy.sleep(1.0)
 
       # Do various motions to align the pose estimate to the actual pose
-      #self.move_to_calibrate_initialpose(2)
+      self.move_to_calibrate_initialpose(2)
 
 
     # The parameters have been set, but we are at the end of game
