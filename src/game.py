@@ -787,7 +787,8 @@ class AMTHGame():
 
 
 
-    # Display label, NOT button
+    # Display label, NOT button; see
+    # https://github.com/PySimpleGUI/PySimpleGUI/issues/5036#issuecomment-1000423733
     playLabel = Tkinter.Label(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', image=photo, compound=Tkinter.TOP)
     if game_notover_flag:
       labelText = '\n\nΕΥΓΕ! Έχετε %d πόντους!' % self.stats[2][self.state[0]]
