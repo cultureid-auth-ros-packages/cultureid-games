@@ -377,6 +377,9 @@ class AMTHGames():
       # Do various motions to align the pose estimate to the actual pose
       self.move_to_calibrate_initialpose(2)
 
+      # Store the initial pose of the robot after calibration
+      self.calibrated_pose_msg = \
+          rospy.wait_for_message('/amcl_pose', PoseWithCovarianceStamped)
 
     # The parameters have been set, but we are at the end of game
     if len(self.quartet_codes_played) > 1 and \
@@ -388,6 +391,17 @@ class AMTHGames():
             self.pkg_name, self.quartet_codes[q])
         self.kill_root()
       else:
+
+        # The robot has moved due to celebrations and people were around it:
+        # this may have caused the robot to misplace its pose, so set it again
+        self.amcl_init_pose_pub.publish(self.calibrated_pose_msg)
+        rospy.sleep(2.0)
+
+        # Do various motions to align the pose estimate to the actual pose
+        self.move_to_calibrate_initialpose(1)
+        rospy.sleep(2.0)
+
+        # You may now move to your destination
         self.goto_goal_pose()
 
     # Play this specific game. Its questions, answers, etc have been uploaded
