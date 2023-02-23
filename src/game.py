@@ -780,28 +780,23 @@ class AMTHGame():
     frame = self.new_frame()
     self.set_frame(frame)
 
-    # ta koumpia tou para8urou
-    buttonVec = []
-    buttonText = []
-
+    # The photo displayed over the label
     photo = Tkinter.PhotoImage(master = self.canvas_, file = self.correct_answer_image)
 
     game_notover_flag = self.state[1][self.state[0]] < len(self.Q[self.state[0]])
 
-    if game_notover_flag:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40',command=self.select_group_init, image=photo, compound=Tkinter.TOP)
-      buttonVec.append(playButton)
 
-      show_str = 'ΕΥΓΕ! Έχετε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
-      buttonText.append(show_str)
+
+    # Display label, NOT button; see
+    # https://github.com/PySimpleGUI/PySimpleGUI/issues/5036#issuecomment-1000423733
+    playLabel = Tkinter.Label(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', image=photo, compound=Tkinter.TOP)
+    if game_notover_flag:
+      labelText = 'ΕΥΓΕ! Έχετε %d πόντους!' % self.stats[2][self.state[0]]
     else:
-      playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game_over, self.state[0]), image=photo, compound=Tkinter.TOP)
-      buttonVec.append(playButton)
-      show_str = 'ΣΥΓΧΑΡΗΤΗΡΙΑ! Συγκεντρώσατε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
-      buttonText.append(show_str)
+      labelText = 'ΣΥΓΧΑΡΗΤΗΡΙΑ! \nΣυγκεντρώσατε %d πόντους!' % self.stats[2][self.state[0]]
 
     xNum = 1
-    yNum = len(buttonVec)
+    yNum = 1
 
     xEff = 1.0
     yEff = 1.0
@@ -822,19 +817,29 @@ class AMTHGame():
         thisX = xG/2+xx*xWithGuard
         thisY = yG/2+yy*yWithGuard
 
-        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
-        buttonVec[counter].config(text=buttonText[counter])
-        buttonVec[counter].update()
+        playLabel.place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        playLabel.config(text=labelText)
+        playLabel.update()
 
-        thisWidth = buttonVec[counter].winfo_width()
-        thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 30))
-        buttonVec[counter].update()
+        thisWidth = playLabel.winfo_width()
+        thisHeight = playLabel.winfo_height()
+        playLabel.config(font=("Helvetica", 30))
+        playLabel.update()
 
-        counter = counter+1
+
+
 
     # Celebrate mf
     self.celebrate(game_notover_flag )
+
+    # Keep score screen on for a second
+    rospy.sleep(1)
+
+    # Go back to the beginning or to the end
+    if game_notover_flag:
+      self.select_group_init()
+    else:
+      self.game_over(self.state[0])
 
 
   ##############################################################################
@@ -1294,20 +1299,16 @@ class AMTHGame():
     frame = self.new_frame()
     self.set_frame(frame)
 
-    # ta koumpia tou para8urou
-    buttonVec = []
-    buttonText = []
-
+    # The photo to appear on the label
     photo = Tkinter.PhotoImage(master = self.canvas_, file = self.incorrect_answer_image)
 
-    show_str = 'Κάνατε λάθος. Έχετε %d πόντους!\n Πιέστε για συνέχεια' % self.stats[2][self.state[0]]
-    buttonText.append(show_str)
 
-    playButton = Tkinter.Button(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', command=partial(self.game, self.state[0]), image=photo, compound=Tkinter.TOP)
-    buttonVec.append(playButton)
+    # Display label, NOT button
+    playLabel = Tkinter.Label(frame,text='???',fg='#E0B548',bg='#343A40',activeforeground='#E0B548',activebackground='#343A40', image=photo, compound=Tkinter.TOP)
+    labelText = 'Κάνατε λάθος. Έχετε %d πόντους!' % self.stats[2][self.state[0]]
 
     xNum = 1
-    yNum = len(buttonVec)
+    yNum = 1
 
     xEff = 1.0
     yEff = 1.0
@@ -1328,19 +1329,24 @@ class AMTHGame():
         thisX = xG/2+xx*xWithGuard
         thisY = yG/2+yy*yWithGuard
 
-        buttonVec[counter].place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
-        buttonVec[counter].config(text=buttonText[counter])
-        buttonVec[counter].update()
+        playLabel.place(relx=thisX,rely=thisY,relheight=yB,relwidth=xB)
+        playLabel.config(text=labelText)
+        playLabel.update()
 
-        thisWidth = buttonVec[counter].winfo_width()
-        thisHeight = buttonVec[counter].winfo_height()
-        buttonVec[counter].config(font=("Helvetica", 30))
-        buttonVec[counter].update()
+        thisWidth = playLabel.winfo_width()
+        thisHeight = playLabel.winfo_height()
+        playLabel.config(font=("Helvetica", 30))
+        playLabel.update()
 
-        counter = counter+1
+
 
     # Voice of goddess
     call(['cvlc', '--no-repeat','--play-and-exit', self.dir_media + '/try_again.mp3'])
+
+    # Keep score screen on for a second
+    rospy.sleep(1)
+
+    self.game(self.state[0])
 
   ##############################################################################
   def init(self):
