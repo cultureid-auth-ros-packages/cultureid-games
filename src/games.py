@@ -404,6 +404,10 @@ class AMTHGames():
         # You may now move to your destination
         self.goto_goal_pose()
 
+        # Store the initial pose of the robot after navigation
+        self.calibrated_pose_msg = \
+            rospy.wait_for_message('/amcl_pose', PoseWithCovarianceStamped)
+
     # Play this specific game. Its questions, answers, etc have been uploaded
     # and set. This function blocks.
     one_game = game.AMTHGame()
@@ -532,26 +536,31 @@ class AMTHGames():
     for i in range(num_tries):
 
       # Forth ------------------------------------------------------------------
+      rospy.sleep(0.5)
       for i in range(trn_nm):
         self.raw_velocity_commands_pub.publish(twist_msg_bf_p)
         rospy.sleep(0.5)
 
       # Counterclockwise -------------------------------------------------------
+      rospy.sleep(0.5)
       for i in range(rot_nm):
         self.raw_velocity_commands_pub.publish(twist_msg_ss_n)
         rospy.sleep(0.5)
 
       # Clockwise --------------------------------------------------------------
+      rospy.sleep(0.5)
       for i in range(2*rot_nm):
         self.raw_velocity_commands_pub.publish(twist_msg_ss_p)
         rospy.sleep(0.5)
 
       # Counterclockwise -------------------------------------------------------
+      rospy.sleep(0.5)
       for i in range(rot_nm):
         self.raw_velocity_commands_pub.publish(twist_msg_ss_n)
         rospy.sleep(0.5)
 
       # Back -------------------------------------------------------------------
+      rospy.sleep(0.5)
       for i in range(trn_nm):
         self.raw_velocity_commands_pub.publish(twist_msg_bf_n)
         rospy.sleep(0.5)
